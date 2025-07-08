@@ -1,23 +1,20 @@
 from elevenlabs.client import ElevenLabs
-from .logger import Logger
+from VoiceGenerator.log.logger import Logger
+import os
 
-eb = ElevenLabs(
-    api_key="sk_67b06ceb665785b7b749c0740d2efaebc936653140bb4fca"
-)
+CURRENT_PATH_FILE = os.path.abspath(__file__)
 
-audio_stream = eb.text_to_speech.stream(
-    text="This is a test",
-    voice_id="JBFqnCBsd6RMkjVDRZzb",
-    model_id="eleven_multilingual_v2"
-)
+"""
 
-# Save the stream to a file
-with open("../output.mp3", "wb") as f:
-    for chunk in audio_stream:
-        if isinstance(chunk, bytes):
-            f.write(chunk)
+DOCUMENTATION:
 
+This VoiceGenerator uses Elevenlabs API:
+Website: https://elevenlabs.io/
 
+API Documentation: https://elevenlabs.io/docs/api-reference/introduction
+
+You do not have a way to check if the API is still valid, you'll gen an answer from the genetate_voice() function to check if is not available anymore.
+"""
 
 
 class VoiceGenerator(object):
@@ -32,8 +29,8 @@ class VoiceGenerator(object):
         self.voice_id = voice_id
         self.model_id = model_id
 
-        self.success_logger = Logger("")
-        self.error_logger = Logger("")
+        self.success_logger = Logger(f"{CURRENT_PATH_FILE}/log/access.log")
+        self.error_logger = Logger(f"{CURRENT_PATH_FILE}/log/errors.log")
 
 
     def genetate_voice(self, text :  str) -> list:
@@ -48,18 +45,21 @@ class VoiceGenerator(object):
 
         try:
             
-            audio_stream = eb.text_to_speech.stream(
+            audio_stream = self.lab.text_to_speech.stream(
                 text=text,
                 voice_id=self.voice_id,
                 model_id=self.model_id
             )
 
+            self.success_logger.create_success_log("Audio voice succesfully created. [object] VoiceGenerator [method] generate_voice()")
+
             return [{"audio_object" : audio_stream
             }, 200]
 
+
         except Exception as error:
             
-            print(str(error))
+            self.error_logger.create_error_log(f"Error occurred: {str(error)}. [object] VoiceGenerator [method] generate_voice()")
 
             return [{"error" : str(error)
             } , 400]
@@ -75,7 +75,7 @@ class VoiceGenerator(object):
 
         try:
 
-            with open("../output.mp3", "wb") as f:
+            with open("output.mp3", "wb") as f:
                 
                 for binary_data in binary_content:
                     if isinstance(binary_data, bytes):
@@ -83,10 +83,13 @@ class VoiceGenerator(object):
 
                 f.close()
 
-            print("File")
+            self.success_logger.create_success_log("Audio voice file succesfully created. [object] VoiceGenerator [method] write_out_voice()")
+
+            return [{}, 200]
+
         except Exception as error:
 
-            print(str(error))
+            self.error_logger.create_error_log(f"Error occurred: {str(error)}. [object] VoiceGenerator [method] write_out_voice()")
 
             return [{"error" : str(error)
             } , 400]
