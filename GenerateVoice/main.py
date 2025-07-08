@@ -1,5 +1,5 @@
 from elevenlabs.client import ElevenLabs
-from VoiceGenerator.log.logger import Logger
+from GenerateVoice.log.logger import Logger
 import os
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
@@ -51,7 +51,7 @@ class VoiceGenerator(object):
                 model_id=self.model_id
             )
 
-            self.success_logger.create_success_log("Audio voice succesfully created. [object] VoiceGenerator [method] generate_voice()")
+            self.success_logger.create_success_log("Audio voice succesfully created. [object] GenerateVoice [method] generate_voice()")
 
             return [{"audio_object" : audio_stream
             }, 200]
@@ -59,7 +59,7 @@ class VoiceGenerator(object):
 
         except Exception as error:
             
-            self.error_logger.create_error_log(f"Error occurred: {str(error)}. [object] VoiceGenerator [method] generate_voice()")
+            self.error_logger.create_error_log(f"Error occurred: {str(error)}. [object] GenerateVoice [method] generate_voice()")
 
             return [{"error" : str(error)
             } , 400]
@@ -83,13 +83,13 @@ class VoiceGenerator(object):
 
                 f.close()
 
-            self.success_logger.create_success_log("Audio voice file succesfully created. [object] VoiceGenerator [method] write_out_voice()")
+            self.success_logger.create_success_log("Audio voice file succesfully created. [object] GenerateVoice [method] write_out_voice()")
 
             return [{}, 200]
 
         except Exception as error:
 
-            self.error_logger.create_error_log(f"Error occurred: {str(error)}. [object] VoiceGenerator [method] write_out_voice()")
+            self.error_logger.create_error_log(f"Error occurred: {str(error)}. [object] GenerateVoice [method] write_out_voice()")
 
             return [{"error" : str(error)
             } , 400]
