@@ -11,17 +11,23 @@ CURRENT_FILE_PATH = pathlib.Path(__file__).parent.resolve()
 
 load_dotenv(dotenv_path=f'{CURRENT_FILE_PATH}\\..\\.env')
 
+# slash
+
+slash = '\\'
+if platform.system() == 'Linux':
+    slash = f"{CURRENT_FILE_PATH}/sql"  # path of the sql Queries folder
+
+
+
 def load_queries() -> dict:
     """
     Function to load all queries to get data from database
     queries path -> /SQLQueries/*
     :return: list
     """
-    path = ''
-    if platform.system() == 'Linux':
-        path = f"{CURRENT_FILE_PATH}/sql" # path of the sql Queries folder
-    if platform.system() == "Windows":
-        path = f"{CURRENT_FILE_PATH}\\sql"
+    global slash
+
+    path = f"{CURRENT_FILE_PATH}{slash}sql"
     queries = {} # store all queries
 
     # SQL files
@@ -34,7 +40,7 @@ def load_queries() -> dict:
             sql_content = str()
 
             # Get the content from the sql file.
-            with open(f"{path}\\{file}", 'r') as sql_file_content:
+            with open(f"{path}{slash}{file}", 'r') as sql_file_content:
                 sql_content = sql_file_content.read()
 
 
