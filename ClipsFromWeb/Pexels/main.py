@@ -126,10 +126,15 @@ class PexelsScraper(object):
                                                                                       "key_word_search" : keyword})):
                         continue
 
+                    file_name = page_href.split('/')[-2]
+
                     results.append({
                         "video_link": page_href,
                         "download_link": download_href,
                         "key_word_search": keyword,
+                        "save_data" : {
+                            "filename" : file_name
+                        }
                     })
 
             except Exception as error:
