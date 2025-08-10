@@ -37,6 +37,7 @@ class Logger(object):
             logger = open(self.logger_path_file, 'a')
 
             return logger
+
         except Exception as error:
             print(error)
 

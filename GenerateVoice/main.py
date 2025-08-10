@@ -1,11 +1,18 @@
 from elevenlabs.client import ElevenLabs
-from GenerateVoice.log.logger import Logger
+from .log.logger import Logger
+from dotenv import load_dotenv
+
 import os
+import json
+import requests
+
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
+CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
+
+load_dotenv(dotenv_path=fr"{CURRENT_PATH}\..\.env")
 
 """
-
 DOCUMENTATION:
 
 This VoiceGenerator uses Elevenlabs API:
@@ -13,27 +20,65 @@ Website: https://elevenlabs.io/
 
 API Documentation: https://elevenlabs.io/docs/api-reference/introduction
 
-You do not have a way to check if the API is still valid, you'll gen an answer from the genetate_voice() function to check if is not available anymore.
+You do not have a way to check if the API is still valid, you'll get an answer from the generate_voice() function to check if is not available anymore.
+
+9BWtsMINqrJLrRacOk9x
 """
 
-
-class VoiceGenerator(object):
+class AIGenerateVoice(object):
     
     """
     Class to generate voices from text 
     """
 
-    def __init__(self, api_key: str, voice_id: str, model_id: str) -> None:
-        
-        self.lab = ElevenLabs(api_key)
+    def __init__(self, api_key: str, voice_id: str = "9BWtsMINqrJLrRacOk9x", model_id: str = None) -> None:
+
+        self.api_key = api_key
+        self.lab = ElevenLabs(api_key = api_key)
         self.voice_id = voice_id
         self.model_id = model_id
 
-        self.success_logger = Logger(f"{CURRENT_PATH_FILE}/log/access.log")
-        self.error_logger = Logger(f"{CURRENT_PATH_FILE}/log/errors.log")
+        self.success_logger = Logger(f"{CURRENT_PATH}/log/access.log")
+        self.error_logger = Logger(f"{CURRENT_PATH}/log/errors.log")
+
+        self.APIs = self.load_apis()
+
+    def load_apis(self) -> dict:
+        """
+
+        Method to load all APIs
+
+        """
+
+        try:
+            print(os.listdir(CURRENT_PATH))
+            if "apis.json" in os.listdir(CURRENT_PATH):
+                with open(fr"{CURRENT_PATH}\apis.json", "r") as file:
+                    try:
+                        return json.load(file)  # Proper way to load from a file
+                    except json.JSONDecodeError:
+                        return {}  # Handle corrupted/empty file
+                    finally:
+                        file.close()
+            else:
+                data = {}
+                with open(fr"{CURRENT_PATH}\apis.json", "w") as file:
+                    json.dump(data, file, indent=4)
+
+                    file.close()
+                self.success_logger.create_success_log(
+                    "File apis.json created successfully. [object] GenerateVoice [method] load_apis()")
+
+                return {}
+
+        except Exception as error:
+
+            self.error_logger.create_error_log(f"Error occurred trying to load APIs. [object] GenerateVoice [method] load_apis()\nError: {error}")
+
+            return {}
 
 
-    def genetate_voice(self, text :  str) -> list:
+    def generate_voice(self, text :  str) -> list:
 
         """
         
@@ -48,7 +93,6 @@ class VoiceGenerator(object):
             audio_stream = self.lab.text_to_speech.stream(
                 text=text,
                 voice_id=self.voice_id,
-                model_id=self.model_id
             )
 
             self.success_logger.create_success_log("Audio voice succesfully created. [object] GenerateVoice [method] generate_voice()")
@@ -66,16 +110,47 @@ class VoiceGenerator(object):
 
 
 
-    def write_out_voice(self, binary_content : bytes) -> list:
+    def get_all_voices(self) -> list:
+
+        try:
+            api_url = self.APIs['voices']
+
+            headers = {"xi-api-key" : self.api_key}
+
+            response = requests.get(api_url, headers= headers)
+
+            if response.status_code == 200:
+
+                json_content = json.loads(response.content.decode())
+
+                return json_content
+
+            else:
+
+
+                return [{"error": "Unknown error"}, 400]
+
+        except Exception as error:
+
+            self.error_logger.create_error_log(
+                f"Error occurred: {str(error)}. [object] GenerateVoice [method] generate_voice()")
+
+            return [{"error": str(error)
+                     }, 400]
+
+
+    def write_out_voice(self, binary_content : bytes, output_path : str = None) -> list:
         """
         
         Method to write out an .mp3 file
 
         """
+        if output_path is None:
+            output_path = "output.mp3"
 
         try:
 
-            with open("output.mp3", "wb") as f:
+            with open(output_path, "wb") as f:
                 
                 for binary_data in binary_content:
                     if isinstance(binary_data, bytes):
@@ -83,7 +158,7 @@ class VoiceGenerator(object):
 
                 f.close()
 
-            self.success_logger.create_success_log("Audio voice file succesfully created. [object] GenerateVoice [method] write_out_voice()")
+            self.success_logger.create_success_log("Audio voice file successfully created. [object] GenerateVoice [method] write_out_voice()")
 
             return [{}, 200]
 
@@ -93,3 +168,14 @@ class VoiceGenerator(object):
 
             return [{"error" : str(error)
             } , 400]
+
+
+# tool = GenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
+# voices = tool.get_all_voices()
+
+# for voice in voices['voices']:
+#     print(voice['name'], voice['voice_id'])
+#     print()
+# voice = tool.generate_voice("Hello everyone! Did you hear about this new feature from Facebook?")[0]['audio_object']
+#
+# tool.write_out_voice(voice)
