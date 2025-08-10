@@ -15,7 +15,7 @@ load_dotenv(dotenv_path=f'{CURRENT_FILE_PATH}\\..\\.env')
 
 slash = '\\'
 if platform.system() == 'Linux':
-    slash = f"{CURRENT_FILE_PATH}/sql"  # path of the sql Queries folder
+    slash = "/"  # path of the sql Queries folder
 
 
 
