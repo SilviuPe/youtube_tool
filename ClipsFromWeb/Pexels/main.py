@@ -32,8 +32,13 @@ class PexelsScraper(object):
     def generate_options_for_chrome() -> Options:
         options = Options()
         # options.headless = True  # Run Chrome in headless mode (no GUI)
-        options.add_argument("--window-size=1920,1080")  # Set window size (important for some sites)
+        # options.add_argument("--window-size=1920,1080")  # Set window size (important for some sites)
 
+        # options.add_argument("--headless=new")  # new headless mode in Chrome
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--window-size=1920,1080")
         return options
 
 
@@ -69,25 +74,6 @@ class PexelsScraper(object):
         else:
             self.error_logger.create_error_log("A different type was provided instead of a link for the video or list with more links. "
                                                "[object] PexelsScraper [method] download_video_from_url()")
-
-            return ''
-
-
-    def __convert_into_base64url(self, path_of_video: str) -> str:
-        """
-        Private method to convert a .mp4 file into Base64 URL
-        :param: path_of_video -> path of the .mp4 file. Absolute path recommended
-        """
-        try:
-
-            with open(path_of_video, 'rb') as video_file:
-                video_bytes = video_file.read()
-            base64url_str = base64.urlsafe_b64encode(video_bytes).decode('utf-8')
-
-            return base64url_str
-
-        except Exception as error:
-            self.error_logger.create_error_log(f"Exception: {str(error)} [object] PexelsScraper [method] convert_into_base64url()")
 
             return ''
 
@@ -140,24 +126,11 @@ class PexelsScraper(object):
                                                                                       "key_word_search" : keyword})):
                         continue
 
-                    video_name = page_href.split('/')[-2]
-                    path = self.download_video_from_url(video_url=download_href, output_name=video_name)
-
-                    if len(path):
-
-                        base64_string = self.__convert_into_base64url(path)
-
-                        results.append({
-                            "video_link": page_href,
-                            "download_link": download_href,
-                            "base64_string": base64_string,
-                            "key_word_search": keyword,
-                            "base64_length": len(base64_string)
-                        })
-
-                    else:
-                        self.error_logger.create_error_log(f"Exception trying to convert file to base64. [object] PexelsScraper [method] get_new_videos()")
-
+                    results.append({
+                        "video_link": page_href,
+                        "download_link": download_href,
+                        "key_word_search": keyword,
+                    })
 
             except Exception as error:
                 self.error_logger.create_error_log(
@@ -171,3 +144,8 @@ class PexelsScraper(object):
             self.error_logger.create_error_log(f"Exception: {str(error)} [object] PexelsScraper [method] get_new_videos()")
 
             return []
+
+
+tool = PexelsScraper()
+videos = tool.get_new_videos("car", 5)
+print(videos)

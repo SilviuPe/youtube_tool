@@ -112,7 +112,6 @@ class DatabaseConnection(object):
     def request_pexels_video(self, id_: bool = False,
                              video_link: bool = False,
                              download_link: bool = False,
-                             base64_string: bool = False,
                              key_word_search: bool = False,
                              conditions: dict | None = None) -> list:
 
@@ -123,7 +122,6 @@ class DatabaseConnection(object):
             "id": id_,
             "video_link": video_link,
             "download_link": download_link,
-            "base64_string": base64_string,
             "key_word_search" : key_word_search
         }
 
@@ -193,31 +191,14 @@ class DatabaseConnection(object):
 
                 for item in data:
 
-                    database_length = 0
-                    item_length = item['base64_length']
-
-                    while item_length != database_length:
-
-                        self.access_logger.create_info_log("Attempt to insert new data.")
-                        cursor.execute(insert_query, (
-                            item["video_link"],
-                            item["download_link"],
-                            item["base64_string"],
-                            item["key_word_search"]
-                        ))
-                        self.conn.commit()
-
-                        new_data = self.request_pexels_video(base64_string=True, conditions={
-                            "video_link" : item["video_link"],
-                            "download_link": item["download_link"]
-                        })
-
-                        database_length = len(new_data[0]['base64_string'])
-
-                        if database_length == item_length:
-                            self.access_logger.create_info_log("Successfully inserted new data.")
-                        else:
-                            self.error_logger.create_error_log("Attempt to send base64 url in database failed. Trying again...")
+                    self.access_logger.create_info_log("Attempt to insert new data.")
+                    cursor.execute(insert_query, (
+                        item["video_link"],
+                        item["download_link"],
+                        item["key_word_search"],
+                        item["video_path"]
+                    ))
+                    self.conn.commit()
 
                 cursor.close()
 
