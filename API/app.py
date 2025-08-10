@@ -23,7 +23,7 @@ def upload_video():
         try:
             db = DatabaseConnection()
 
-            print(db)
+            print(data)
             #db.add_pexels_video(data=data)
 
             return "Data Added Successfully", 200
