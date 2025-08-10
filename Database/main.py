@@ -9,13 +9,15 @@ from .logs.logger import Logger
 
 CURRENT_FILE_PATH = pathlib.Path(__file__).parent.resolve()
 
-load_dotenv(dotenv_path=f'{CURRENT_FILE_PATH}\\..\\.env')
 
 # slash
 
 slash = '\\'
 if platform.system() == 'Linux':
     slash = "/"  # path of the sql Queries folder
+
+load_dotenv(dotenv_path=f'{CURRENT_FILE_PATH}{slash}..{slash}.env')
+
 
 
 
