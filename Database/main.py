@@ -1,6 +1,8 @@
 import psycopg2
 import pathlib
 import os
+import platform
+
 from dotenv import load_dotenv
 
 from .logs.logger import Logger
@@ -15,7 +17,11 @@ def load_queries() -> dict:
     queries path -> /SQLQueries/*
     :return: list
     """
-    path = f"{CURRENT_FILE_PATH}\\sql" # path of the sql Queries folder
+    path = ''
+    if platform.system() == 'Linux':
+        path = f"{CURRENT_FILE_PATH}/sql" # path of the sql Queries folder
+    if platform.system() == "Windows":
+        path = f"{CURRENT_FILE_PATH}\\sql"
     queries = {} # store all queries
 
     # SQL files

@@ -1,7 +1,7 @@
 import undetected_chromedriver as uc
 import time
 import os, sys
-import base64
+import json
 import requests
 
 from .log.logger import Logger
@@ -150,4 +150,5 @@ tool = PexelsScraper()
 videos = tool.get_new_videos("car", 5)
 print(videos)
 
-# http://109.176.199.63:5000
+req = requests.post("http://109.176.199.63:5000/save_new_data", json=videos)
+print(req.content)
