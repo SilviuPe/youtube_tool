@@ -72,7 +72,7 @@ def get_random_video():
 
         random_video_id = random.randint(33,54)
 
-        db_video_path = db.request_pexels_video(video_path=True, conditions={"id" : random_video_id})
+        db_video_path = db.request_pexels_video(video_path=True, conditions={"id" : random_video_id})[0]['video_path']
 
         return send_file(db_video_path)
 
