@@ -2,6 +2,8 @@ import os
 import json
 import requests
 import platform
+import subprocess
+import tempfile
 
 from dotenv import load_dotenv
 
@@ -19,8 +21,9 @@ CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
 slash = '\\'
 if platform.system() == 'Linux':
     slash = "/"  # path of the sql Queries folder
-
-load_dotenv(dotenv_path=f'{CURRENT_PATH}..{slash}.env')
+else:
+    load_dotenv(dotenv_path=f'{CURRENT_PATH}..{slash}.env')
+    API_IP = os.getenv("API")
 
 """
 
@@ -47,7 +50,6 @@ API_DATA = {
                 "method": "POST"
             }
         }
-API_IP = os.getenv("API")
 
 class AIVideoGenerator(object):
 
@@ -207,24 +209,86 @@ class ManualVideoGenerator(object):
 
         return audio_bytes
 
-    def define_videos_data(self, duration : int):
+    def define_video_data(self, audio_script : str):
 
-        videos_qt = int(duration/self.average_video_seconds)
-        last_video_duration = self.average_video_seconds + (duration % self.average_video_seconds)
+        audio_bytes = self.generate_audio(audio_script)
+        audio_duration = get_media_duration(audio_bytes)
+
+        videos_qt = int(audio_duration/self.average_video_seconds)
+        last_video_duration = self.average_video_seconds + (audio_duration % self.average_video_seconds)
 
         data = {
             "video_qt" : videos_qt,
-            "last_video_duration" : last_video_duration
+            "last_video_duration" : last_video_duration,
+            "audio_data": audio_bytes
         }
 
-    def generate_video(self) -> None:
+        return data
 
-        audio_bytes = self.generate_audio(
-            "Hackers don’t knock. They move silently, slipping through the cracks you never see. Every click, every open network — an open door. By the time you notice, they’re already inside, taking what’s yours. Stay protected… before it’s too late.")
+    def generate_video(self, video_paths : list, audio_bytes: bytes, last_video_duration : float) -> bytes:
 
-        write_bytes_to_file(audio_bytes, f"{CURRENT_PATH}{slash}audio.mp3")
-        audio_duration = get_media_duration(audio_bytes)
+        ffmpeg_path = os.path.join(os.getcwd(), "ffmpeg", "bin", "ffmpeg.exe")  # ajustează dacă e altă locație
 
-        print(audio_duration)
+        temp_dir = tempfile.mkdtemp()
+        processed_videos = []
 
-ManualVideoGenerator().generate_video()
+        for i, path in enumerate(video_paths):
+            target_duration = last_video_duration if i == len(video_paths) - 1 else self.average_video_seconds
+
+            output_path = os.path.join(temp_dir, f"clip_{i}.mp4")
+            processed_videos.append(output_path)
+
+            fade_in = 0.5
+            fade_out = 0.5
+
+            cmd = (
+                f'"{ffmpeg_path}" -y -i "{path}" '
+                f'-t {target_duration} '
+                f'-vf "fade=t=in:st=0:d={fade_in},fade=t=out:st={target_duration - fade_out}:d={fade_out}" '
+                f'-af "afade=t=in:st=0:d={fade_in},afade=t=out:st={target_duration - fade_out}:d={fade_out}" '
+                f'-c:v libx264 -c:a aac -strict experimental "{output_path}"'
+            )
+            subprocess.run(cmd, shell=True, check=True)
+
+        concat_file = os.path.join(temp_dir, "concat_list.txt")
+        with open(concat_file, "w", encoding="utf-8") as f:
+            for clip in processed_videos:
+                f.write(f"file '{clip}'\n")
+
+        temp_audio_path = os.path.join(temp_dir, "audio.mp3")
+        with open(temp_audio_path, "wb") as f:
+            f.write(audio_bytes)
+
+        concat_output = os.path.join(temp_dir, "concatenated.mp4")
+        cmd_concat = f'"{ffmpeg_path}" -y -f concat -safe 0 -i "{concat_file}" -c copy "{concat_output}"'
+        subprocess.run(cmd_concat, shell=True, check=True)
+
+        output_path = os.path.join(temp_dir, "output.mp4")
+        cmd_final = (
+            f'"{ffmpeg_path}" -y -i "{concat_output}" -i "{temp_audio_path}" '
+            f'-c:v copy -c:a aac -map 0:v:0 -map 1:a:0 "{output_path}"'
+        )
+        subprocess.run(cmd_final, shell=True, check=True)
+
+        # Citim video-ul final în bytes
+        with open(output_path, "rb") as f:
+            video_bytes = f.read()
+
+        # Curățare fișiere temporare
+        try:
+            for file in processed_videos:
+                os.remove(file)
+            os.remove(concat_file)
+            os.remove(temp_audio_path)
+            os.remove(concat_output)
+            os.remove(output_path)
+            os.rmdir(temp_dir)
+        except Exception:
+            pass  # în caz că unele fișiere sunt deja șterse
+
+        return video_bytes
+
+
+
+
+ManualVideoGenerator().generate_video("Hackers don’t knock. They move silently, slipping through the cracks you never see. Every click, every open network — an open door. By the time you notice, they’re already inside, taking what’s yours. Stay protected… before it’s too late.")

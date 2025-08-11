@@ -3,11 +3,11 @@ import platform
 import os
 import random
 import io
-import zipfile
 
 from flask import Flask, request, send_file
 
 from Database.main import DatabaseConnection
+from GenerateVideo.main import ManualVideoGenerator
 
 app = Flask(__name__)
 
@@ -87,6 +87,7 @@ def get_random_video():
         try:
 
             db = DatabaseConnection()
+            video_tool = ManualVideoGenerator()
 
             try:
 
@@ -95,16 +96,22 @@ def get_random_video():
                 video_quantity = 0
                 random_ids = []
                 video_paths = []
+                audio_script = ''
+                if "audio_script" in data:
+                    audio_script = data['audio_script']
+                else:
+                    return "audio_script is missing", 400
 
                 if "category" in data:
                     conditions.update({"key_word_search": data['category']})
-
-                if "video_qt" in data:
-                    video_quantity = data['video_qt']
                 else:
-                    video_quantity = 1
+                    return "category is missing", 400
 
+                video_data = video_tool.define_video_data(audio_script)
 
+                video_quantity = video_data['video_qt']
+                last_video_duration = video_data['last_video_duration']
+                audio_bytes = video_data['audio_bytes']
 
                 while len(random_ids) < video_quantity:
 
@@ -115,22 +122,15 @@ def get_random_video():
                     else:
                         continue
 
-                if not len(conditions):
-                    conditions = None
-
                 for id_ in random_ids:
 
-                    video_path = db.request_pexels_video(video_path=True, conditions=conditions.update({"id" : id_}))[0]['video_path']
+                    video_path = db.request_pexels_video(video_path=True, conditions={"id" : id_, **conditions})[0]['video_path']
                     video_paths.append(video_path)
 
-                memory_file = io.BytesIO()
+                video_bytes = video_tool.generate_video(video_paths, audio_bytes, last_video_duration)
 
-                with zipfile.ZipFile(memory_file, 'w') as zf:
-                    for filepath in video_paths:
-                        zf.write(filepath, arcname=filepath.split("/")[-1])
-                memory_file.seek(0)
 
-                return send_file(memory_file, mimetype='application/zip', download_name='videos.zip')
+                return send_file(io.BytesIO(video_bytes), mimetype="video/mp4", as_attachment=True, download_name="video.mp4")
 
             except Exception as error:
 
