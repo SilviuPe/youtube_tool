@@ -1,2 +1,2 @@
-INSERT INTO pexels_videos (video_link, download_link, base64_string, key_word_search)
+INSERT INTO pexels_videos (video_link, download_link, key_word_search, video_path)
 VALUES (%s, %s, %s, %s)
