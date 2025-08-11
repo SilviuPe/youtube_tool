@@ -220,7 +220,7 @@ class ManualVideoGenerator(object):
         data = {
             "video_qt" : videos_qt,
             "last_video_duration" : last_video_duration,
-            "audio_data": audio_bytes
+            "audio_bytes": audio_bytes
         }
 
         return data
