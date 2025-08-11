@@ -1,8 +1,9 @@
 import requests
 import platform
 import os
+import random
 
-from flask import Flask, request
+from flask import Flask, request, send_file
 
 from Database.main import DatabaseConnection
 
@@ -28,7 +29,7 @@ def download_video(url: str, name: str, path: str = default_path):
     return f"{path}{slash}{name}.mp4"
 
 
-@app.route("/save_new_data", methods=["POST"])
+@app.route("/save-new-data", methods=["POST"])
 def upload_video():
     try:
         data = request.get_json()
@@ -62,6 +63,20 @@ def upload_video():
             return f"Error: {str(error)}", 400
 
 
+@app.route('/get-random-video', methods=['GET'])
+def get_random_video():
 
+    try:
+
+        db = DatabaseConnection()
+
+        random_video_id = random.randint(33,54)
+
+        db_video_path = db.request_pexels_video(video_path=True, conditions={"id" : random_video_id})
+
+        return send_file(db_video_path)
+
+    except Exception as error:
+        return "Error: {str(error)}", 400
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

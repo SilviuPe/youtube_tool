@@ -150,9 +150,8 @@ class PexelsScraper(object):
             return []
 
 
-tool = PexelsScraper()
-videos = tool.get_new_videos("car", 5)
-print(videos)
-
-req = requests.post("http://109.176.199.63:5000/save_new_data", json=videos)
-print(req.content)
+# tool = PexelsScraper()
+# videos = tool.get_new_videos("car")
+#
+# req = requests.post("http://109.176.199.63:5000/save_new_data", json=videos)
+# print(req.content)

@@ -6,7 +6,7 @@ from GenerateVoice.main import AIGenerateVoice
 from Database.main import DatabaseConnection
 
 from .log.logger import Logger
-from .utils.audio import get_media_duration, save_video_from_base64
+from .utils.audio import get_media_duration
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
@@ -45,11 +45,6 @@ class AIVideoGenerator(object):
 
         self.success_logger = Logger(f"{CURRENT_PATH}\\log\\access.log")
         self.error_logger = Logger(f"{CURRENT_PATH}\\log\\errors.log")
-
-
-
-        print(self.error_logger.logger_path_file)
-
 
 
     def generate_data(self) -> None:
@@ -199,24 +194,14 @@ class ManualVideoGenerator(object):
         return audio_bytes
 
 
-    def __get_video_base64_code(self) -> list:
-
-        videos = self.db_connection.request_pexels_video(base64_string=True, conditions={'id':31})
-
-        return [video['base64_string'] for video in videos]
 
     def generate_video(self) -> None:
 
-        base64_codes = self.__get_video_base64_code()  # List of base64 video strings
-        save_video_from_base64(base64_codes[0], f"{CURRENT_PATH}\\output.mp4")
-        # audio_bytes = self.generate_audio(
-        #     "Hackers are not what you imagine; they possess extraordinary skills beyond belief.")
+        audio_bytes = self.generate_audio(
+            "Hackers are not what you imagine; they possess extraordinary skills beyond belief.")
 
+        audio_duration = get_media_duration(audio_bytes)
 
-        # with open(f"{CURRENT_PATH}\\base64.txt", 'w') as f:
-        #     f.write(base64_codes[0])
-
-        # audio_duration = get_media_duration(audio_bytes)
-
+        print()
 
 ManualVideoGenerator().generate_video()

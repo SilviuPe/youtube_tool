@@ -51,7 +51,6 @@ class AIGenerateVoice(object):
         """
 
         try:
-            print(os.listdir(CURRENT_PATH))
             if "apis.json" in os.listdir(CURRENT_PATH):
                 with open(fr"{CURRENT_PATH}\apis.json", "r") as file:
                     try:

@@ -127,6 +127,7 @@ class DatabaseConnection(object):
                              video_link: bool = False,
                              download_link: bool = False,
                              key_word_search: bool = False,
+                             video_path: bool = False,
                              conditions: dict | None = None) -> list:
 
         insert_query, cursor = self.get_insert_query_and_create_cursor('getPexelsVideos')
@@ -136,7 +137,8 @@ class DatabaseConnection(object):
             "id": id_,
             "video_link": video_link,
             "download_link": download_link,
-            "key_word_search" : key_word_search
+            "key_word_search": key_word_search,
+            "video_path": video_path
         }
 
         # Check selected columns
