@@ -9,7 +9,6 @@ from .logs.logger import Logger
 
 CURRENT_FILE_PATH = pathlib.Path(__file__).parent.resolve()
 
-
 # slash
 
 slash = '\\'

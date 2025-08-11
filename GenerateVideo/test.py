@@ -1,12 +1,16 @@
-import os
-
-from GenerateVoice.main import GenerateVoice
+import requests, os
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
 
-tool = GenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
+json_data = {
+    'category' : 'car',
+    'video_qt' : 10
+}
 
-voice = tool.generate_voice("Hello everyone! Did you hear about this new feature from Facebook?")[0]['audio_object']
+res = requests.post('http://109.176.199.63:5000/get-random-video', stream=True)
 
-tool.write_out_voice(voice, output_path=f"{CURRENT_PATH}\\output.mp3")
+with open(f"{CURRENT_PATH}\\videos.zip", 'wb') as f:
+    for chunk in res.iter_content(chunk_size=8192):
+        f.write(chunk)
+    f.close()

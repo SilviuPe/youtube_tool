@@ -1,15 +1,26 @@
 import os
 import json
 import requests
+import platform
+
+from dotenv import load_dotenv
 
 from GenerateVoice.main import AIGenerateVoice
 from Database.main import DatabaseConnection
 
 from .log.logger import Logger
-from .utils.audio import get_media_duration
+from .utils.audio import get_media_duration, write_bytes_to_file
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
+
+# slash
+
+slash = '\\'
+if platform.system() == 'Linux':
+    slash = "/"  # path of the sql Queries folder
+
+load_dotenv(dotenv_path=f'{CURRENT_PATH}..{slash}.env')
 
 """
 
@@ -36,6 +47,7 @@ API_DATA = {
                 "method": "POST"
             }
         }
+API_IP = os.getenv("API")
 
 class AIVideoGenerator(object):
 
@@ -175,7 +187,9 @@ class ManualVideoGenerator(object):
     Object to generate videos from scratch
     """
 
-    def __init__(self) -> None:
+    def __init__(self, average_video_seconds: int = 4) -> None:
+        self.average_video_seconds = average_video_seconds
+
         self.voice_tool = AIGenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
         self.db_connection = DatabaseConnection()
 
@@ -193,15 +207,24 @@ class ManualVideoGenerator(object):
 
         return audio_bytes
 
+    def define_videos_data(self, duration : int):
 
+        videos_qt = int(duration/self.average_video_seconds)
+        last_video_duration = self.average_video_seconds + (duration % self.average_video_seconds)
+
+        data = {
+            "video_qt" : videos_qt,
+            "last_video_duration" : last_video_duration
+        }
 
     def generate_video(self) -> None:
 
         audio_bytes = self.generate_audio(
-            "Hackers are not what you imagine; they possess extraordinary skills beyond belief.")
+            "Hackers don’t knock. They move silently, slipping through the cracks you never see. Every click, every open network — an open door. By the time you notice, they’re already inside, taking what’s yours. Stay protected… before it’s too late.")
 
+        write_bytes_to_file(audio_bytes, f"{CURRENT_PATH}{slash}audio.mp3")
         audio_duration = get_media_duration(audio_bytes)
 
-        print()
+        print(audio_duration)
 
 ManualVideoGenerator().generate_video()

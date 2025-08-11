@@ -2,6 +2,8 @@ import requests
 import platform
 import os
 import random
+import io
+import zipfile
 
 from flask import Flask, request, send_file
 
@@ -63,20 +65,85 @@ def upload_video():
             return f"Error: {str(error)}", 400
 
 
-@app.route('/get-random-video', methods=['GET'])
+@app.route('/get-random-video', methods=['GET', 'POST'])
 def get_random_video():
 
-    try:
+    if request.method == 'GET':
+        try:
 
-        db = DatabaseConnection()
+            db = DatabaseConnection()
 
-        random_video_id = random.randint(33,54)
+            random_video_id = random.randint(33,54)
 
-        db_video_path = db.request_pexels_video(video_path=True, conditions={"id" : random_video_id})[0]['video_path']
+            db_video_path = db.request_pexels_video(video_path=True, conditions={"id" : random_video_id})[0]['video_path']
 
-        return send_file(db_video_path)
+            return send_file(db_video_path)
 
-    except Exception as error:
-        return "Error: {str(error)}", 400
+        except Exception as error:
+            return f"Error: {str(error)}", 400
+
+    elif request.method == 'POST':
+
+        try:
+
+            db = DatabaseConnection()
+
+            try:
+
+                data = request.get_json()
+                conditions = {}
+                video_quantity = 0
+                random_ids = []
+                video_paths = []
+
+                if "category" in data:
+                    conditions.update({"key_word_search": data['category']})
+
+                if "video_qt" in data:
+                    video_quantity = data['video_qt']
+                else:
+                    video_quantity = 1
+
+
+
+                while len(random_ids) < video_quantity:
+
+                    random_id = random.randint(33,54)
+
+                    if random_id not in random_ids:
+                        random_ids.append(random_id)
+                    else:
+                        continue
+
+                if not len(conditions):
+                    conditions = None
+
+                for id_ in random_ids:
+
+                    video_path = db.request_pexels_video(video_path=True, conditions=conditions.update({"id" : id_}))[0]['video_path']
+                    video_paths.append(video_path)
+
+                memory_file = io.BytesIO()
+
+                with zipfile.ZipFile(memory_file, 'w') as zf:
+                    for filepath in video_paths:
+                        zf.write(filepath, arcname=filepath.split("/")[-1])
+                memory_file.seek(0)
+
+                return send_file(memory_file, mimetype='application/zip', download_name='videos.zip')
+
+            except Exception as error:
+
+                return f"Exception: {str(error)}", 400
+
+
+
+        except Exception as error:
+            return f"Exception: {str(error)}", 400
+
+    else:
+
+        return f"Method not allowed"
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
