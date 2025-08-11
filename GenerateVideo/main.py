@@ -19,7 +19,9 @@ CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
 # slash
 
 slash = '\\'
+OS = 'Windows'
 if platform.system() == 'Linux':
+    OS = 'Linux'
     slash = "/"  # path of the sql Queries folder
 else:
     load_dotenv(dotenv_path=f'{CURRENT_PATH}..{slash}.env')
@@ -226,8 +228,12 @@ class ManualVideoGenerator(object):
         return data
 
     def generate_video(self, video_paths : list, audio_bytes: bytes, last_video_duration : float) -> bytes:
+        ffmpeg_path = ''
 
-        ffmpeg_path = os.path.join(CURRENT_PATH, "ffmpeg", "bin", "ffmpeg.exe")  # ajustează dacă e altă locație
+        if OS == 'Windows':
+            ffmpeg_path = os.path.join(CURRENT_PATH, "ffmpeg", "bin", "ffmpeg.exe")  # ajustează dacă e altă locație
+        if OS == 'Linux':
+            ffmpeg_path = 'ffmpeg'
 
         temp_dir = tempfile.mkdtemp()
         processed_videos = []
