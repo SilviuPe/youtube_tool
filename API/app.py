@@ -8,11 +8,11 @@ from Database.main import DatabaseConnection
 
 app = Flask(__name__)
 
-# CURRENT_PATH_FILE = os.path.abspath(__file__)
-# CURRENT_DIR = os.path.dirname(CURRENT_PATH_FILE)
+CURRENT_PATH_FILE = os.path.abspath(__file__)
+CURRENT_DIR = os.path.dirname(CURRENT_PATH_FILE)
 
 slash = '\\'
-default_path = f"C:/"
+default_path = f"{CURRENT_DIR}"
 
 if platform.system() == 'Linux':
     slash = "/"  # path of the sql Queries folder
