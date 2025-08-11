@@ -227,7 +227,7 @@ class ManualVideoGenerator(object):
 
     def generate_video(self, video_paths : list, audio_bytes: bytes, last_video_duration : float) -> bytes:
 
-        ffmpeg_path = os.path.join(os.getcwd(), "ffmpeg", "bin", "ffmpeg.exe")  # ajustează dacă e altă locație
+        ffmpeg_path = os.path.join(CURRENT_PATH, "ffmpeg", "bin", "ffmpeg.exe")  # ajustează dacă e altă locație
 
         temp_dir = tempfile.mkdtemp()
         processed_videos = []
