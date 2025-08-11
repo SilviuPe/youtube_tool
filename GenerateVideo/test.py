@@ -13,7 +13,7 @@ json_data = {
 res = requests.post('http://109.176.199.63:5000/get-random-video', json=json_data, stream=True)
 
 if res.status_code == 200:
-    with open("received_video.mp4", "wb") as f:
+    with open(f"{CURRENT_PATH}\\received_video.mp4", "wb") as f:
         for chunk in res.iter_content(chunk_size=8192):
             if chunk:  # ignore keep-alive chunks
                 f.write(chunk)

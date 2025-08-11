@@ -3,4 +3,3 @@
 .idea
 **/*.log*
 .env
-GenerateVideo/ffmpeg/
