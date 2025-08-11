@@ -1,7 +1,6 @@
 import undetected_chromedriver as uc
 import time
-import os, sys
-import json
+import os
 import requests
 
 from .log.logger import Logger
