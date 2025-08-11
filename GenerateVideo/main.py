@@ -291,4 +291,4 @@ class ManualVideoGenerator(object):
 
 
 
-ManualVideoGenerator().generate_video("Hackers don’t knock. They move silently, slipping through the cracks you never see. Every click, every open network — an open door. By the time you notice, they’re already inside, taking what’s yours. Stay protected… before it’s too late.")
+# ManualVideoGenerator().generate_video("Hackers don’t knock. They move silently, slipping through the cracks you never see. Every click, every open network — an open door. By the time you notice, they’re already inside, taking what’s yours. Stay protected… before it’s too late.")
