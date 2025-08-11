@@ -37,7 +37,7 @@ def upload_video():
 
             try:
                 db = DatabaseConnection()
-
+                db_data = []
                 for video in data:
                     if "save_data" in video:
                         if "filename" in video["save_data"]:
@@ -46,8 +46,9 @@ def upload_video():
                             del video['save_data']
 
                             video.update({"video_path" : file_path})
+                            db_data.append(video)
 
-                            db.add_pexels_video(data=video)
+                db.add_pexels_video(data=db_data)
 
                 return "Data Added Successfully", 200
 

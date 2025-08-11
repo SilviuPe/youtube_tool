@@ -202,7 +202,6 @@ class DatabaseConnection(object):
 
             if data:
 
-
                 for item in data:
 
                     self.access_logger.create_info_log("Attempt to insert new data.")
