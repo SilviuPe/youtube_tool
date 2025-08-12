@@ -28,18 +28,22 @@ class VideoMetaData(object):
             if setting in data:
                 block_video_metadata[setting] = data[setting]
 
-        ffmpeg_command = (f"ffmpeg -i {input_file} "
-                          f"-vf {block_video_metadata['resolution']} "
-                          f"-c:v {block_video_metadata['codec_video']} "
-                          f"-profile:v {block_video_metadata['codec_profile_video']} "
-                          f"-level {block_video_metadata['codec_video_level']} "
-                          f"-pix_fmt {block_video_metadata['pixel_format']} "
-                          f"-crf {block_video_metadata['crf']} "
-                          f"-preset {block_video_metadata['preset']} "
-                          f"-movflags {block_video_metadata['movflags']} "
-                          f"-an "
-                          f"-r {block_video_metadata['fps']} "
-                          f"-y temp_output.mp4 && mv -f temp_output.mp4 {input_file} ")
+        ffmpeg_command = [
+            "ffmpeg",
+            "-i", input_file,
+            "-vf", block_video_metadata['resolution'],
+            "-c:v", block_video_metadata['codec_video'],
+            "-profile:v", block_video_metadata['codec_profile_video'],
+            "-level", block_video_metadata['codec_video_level'],
+            "-pix_fmt", block_video_metadata['pixel_format'],
+            "-crf", str(block_video_metadata['crf']),  # Ensure it's string if number
+            "-preset", block_video_metadata['preset'],
+            "-movflags", block_video_metadata['movflags'],
+            "-an",
+            "-r", str(block_video_metadata['fps']),  # Ensure it's string if number
+            "-y",
+            "temp_output.mp4"
+        ]
 
 
         command_result = subprocess.run(ffmpeg_command, capture_output=True, text=True)
