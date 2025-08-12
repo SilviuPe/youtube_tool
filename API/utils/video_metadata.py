@@ -43,7 +43,9 @@ class VideoMetaData(object):
             "-an",
             "-r", str(block_video_metadata['fps']),  # Ensure it's string if number
             "-y",
-            "temp_output.mp4"
+            "temp_output.mp4",
+            "&&",
+            f"mv -f temp_output.mp4 \"{input_file}\""
         ]
 
         print(" ".join(ffmpeg_command))
