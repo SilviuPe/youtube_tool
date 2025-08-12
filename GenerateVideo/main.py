@@ -251,8 +251,7 @@ class ManualVideoGenerator(object):
                 f'"{ffmpeg_path}" -y -i "{path}" '
                 f'-t {target_duration} '
                 f'-vf "fade=t=in:st=0:d={fade_in},fade=t=out:st={target_duration - fade_out}:d={fade_out}" '
-                f'-af "afade=t=in:st=0:d={fade_in},afade=t=out:st={target_duration - fade_out}:d={fade_out}" '
-                f'-c:v libx264 -c:a aac -strict experimental "{output_path}"'
+                f'"{output_path}"'
             )
             subprocess.run(cmd, shell=True, check=True)
 
