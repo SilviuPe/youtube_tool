@@ -6,9 +6,9 @@ CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
 # /get-random-video
 #
 json_data = {
-    'category' : 'keyboard',
+    'category' : 'hacking',
     'video_qt' : 3,
-    'audio_script': "Alright, here’s one for you—if you’re cruising at 60 mph and you glance at your phone for just 5 seconds, you’ve basically just driven the length of a football field without looking. Kinda like closing your eyes while sprinting… but in a two-ton metal box."
+    'audio_script': "Alright, here’s one for you—if a hacker gets your email password, they can often reset every other account you own in under 10 minutes. It’s like giving someone the master key to your entire life… plus the spare, plus the one you didn’t even know existed."
 }
 #109.176.199.63
 # 192.168.0.108
@@ -29,7 +29,7 @@ else:
 #
 # tool = PexelsScraper()
 #
-# videos = tool.get_new_videos("keyboard", 10)
+# videos = tool.get_new_videos("hacking", 10)
 #
 # res = requests.post('http://109.176.199.63:5000/save-new-data', json=videos)
 #
