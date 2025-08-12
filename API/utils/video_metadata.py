@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 class VideoMetaData(object):
@@ -48,18 +49,16 @@ class VideoMetaData(object):
             f"mv -f temp_output.mp4 \"{input_file}\""
         ]
 
-        override_command = [f'mv -f temp_output.mp4 "{input_file}"']
+        override_command = f'mv -f temp_output.mp4 "{input_file}"'
 
         print(" ".join(ffmpeg_command))
 
         command_result = subprocess.run(ffmpeg_command, capture_output=True, text=True)
-        override_command_result = subprocess.run(override_command,capture_output=True, text=True)
+        override_command_result = os.system(override_command)
 
         if command_result.returncode != 0:
             print("FFmpeg Error:", command_result.stderr)
 
-        if override_command_result.returncode != 0:
-            print("FFmpeg Error:", override_command_result.stderr)
 """
 
 ffmpeg -i input.mp4 \
