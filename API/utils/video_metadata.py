@@ -26,6 +26,7 @@ class VideoMetaData(object):
         for setting in list(self.default_video_stream_data.keys()):
 
             if setting in data:
+
                 block_video_metadata[setting] = data[setting]
 
         ffmpeg_command = [
@@ -45,6 +46,7 @@ class VideoMetaData(object):
             "temp_output.mp4"
         ]
 
+        print(" ".join(ffmpeg_command))
 
         command_result = subprocess.run(ffmpeg_command, capture_output=True, text=True)
 

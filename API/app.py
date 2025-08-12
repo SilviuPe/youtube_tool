@@ -48,7 +48,6 @@ def upload_video():
                     if "save_data" in video:
                         if "filename" in video["save_data"]:
                             file_path = download_video(video['download_link'],video["save_data"]["filename"])
-                            print(file_path)
                             v_metadata_tool.change_metadata(data={'file_path' : file_path})
 
                             del video['save_data']
