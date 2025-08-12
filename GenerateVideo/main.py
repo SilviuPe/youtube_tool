@@ -289,12 +289,8 @@ class ManualVideoGenerator(object):
             os.remove(concat_output)
             os.remove(output_path)
             os.rmdir(temp_dir)
+
         except Exception:
             pass  # în caz că unele fișiere sunt deja șterse
 
         return video_bytes
-
-
-
-
-# ManualVideoGenerator().generate_video("Hackers don’t knock. They move silently, slipping through the cracks you never see. Every click, every open network — an open door. By the time you notice, they’re already inside, taking what’s yours. Stay protected… before it’s too late.")

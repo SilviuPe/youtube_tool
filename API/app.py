@@ -5,9 +5,11 @@ import random
 import io
 
 from flask import Flask, request, send_file
+from typing_extensions import override
 
 from Database.main import DatabaseConnection
 from GenerateVideo.main import ManualVideoGenerator
+from .utils.video_metadata import VideoMetaData
 
 app = Flask(__name__)
 
@@ -40,11 +42,13 @@ def upload_video():
 
             try:
                 db = DatabaseConnection()
+                v_metadata_tool = VideoMetaData()
                 db_data = []
                 for video in data:
                     if "save_data" in video:
                         if "filename" in video["save_data"]:
                             file_path = download_video(video['download_link'],video["save_data"]["filename"])
+                            v_metadata_tool.change_metadata(data={'file_path' : file_path})
 
                             del video['save_data']
 

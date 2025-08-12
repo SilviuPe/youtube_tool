@@ -5,7 +5,7 @@ CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
 
 json_data = {
     'category' : 'car',
-    'video_qt' : 5,
+    'video_qt' : 3,
     'audio_script': "Alright, here’s one for you—if you’re cruising at 60 mph and you glance at your phone for just 5 seconds, you’ve basically just driven the length of a football field without looking. Kinda like closing your eyes while sprinting… but in a two-ton metal box."
 }
 #109.176.199.63
