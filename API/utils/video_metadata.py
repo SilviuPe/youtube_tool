@@ -28,7 +28,6 @@ class VideoMetaData(object):
             if setting in data:
                 block_video_metadata[setting] = data[setting]
 
-
         ffmpeg_command = (f"ffmpeg -i {input_file} "
                           f"-vf {block_video_metadata['resolution']} "
                           f"-c:v {block_video_metadata['codec_video']} "
@@ -43,8 +42,10 @@ class VideoMetaData(object):
                           f"-y temp_output.mp4 && mv -f temp_output.mp4 {input_file} ")
 
 
-        subprocess.run(ffmpeg_command, capture_output=True, text=True)
+        command_result = subprocess.run(ffmpeg_command, capture_output=True, text=True)
 
+        if command_result.returncode != 0:
+            print("FFmpeg Error:", command_result.stderr)
 """
 
 ffmpeg -i input.mp4 \
