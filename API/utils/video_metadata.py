@@ -33,14 +33,14 @@ class VideoMetaData(object):
                           f"-vf {block_video_metadata['resolution']} "
                           f"-c:v {block_video_metadata['codec_video']} "
                           f"-profile:v {block_video_metadata['codec_profile_video']} "
-                          f"-level {block_video_metadata['codec_video_level']}"
-                          f"-pix_fmt {block_video_metadata['pixel_format']}"
-                          f"-crf {block_video_metadata['crf']}"
-                          f"-preset {block_video_metadata['preset']}"
-                          f"-movflags {block_video_metadata['movflags']}"
-                          f"-an"
-                          f"-r {block_video_metadata['fps']}"
-                          f"-y temp_output.mp4 && mv -f temp_output.mp4 {input_file}")
+                          f"-level {block_video_metadata['codec_video_level']} "
+                          f"-pix_fmt {block_video_metadata['pixel_format']} "
+                          f"-crf {block_video_metadata['crf']} "
+                          f"-preset {block_video_metadata['preset']} "
+                          f"-movflags {block_video_metadata['movflags']} "
+                          f"-an "
+                          f"-r {block_video_metadata['fps']} "
+                          f"-y temp_output.mp4 && mv -f temp_output.mp4 {input_file} ")
 
 
         subprocess.run(ffmpeg_command, capture_output=True, text=True)
