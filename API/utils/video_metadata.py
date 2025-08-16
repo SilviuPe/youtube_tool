@@ -58,7 +58,6 @@ class VideoMetaData(object):
             print("FFmpeg Error:", command_result.stderr)
 
 """
-
 ffmpeg -i input.mp4 \
        -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,setsar=1" \
        -c:v libx264 \
@@ -71,5 +70,4 @@ ffmpeg -i input.mp4 \
        -c:a aac -b:a 192k \
        -r 60 \
        output_shorts.mp4
-
 """

@@ -77,7 +77,7 @@ def get_random_video():
 
             db = DatabaseConnection()
 
-            random_video_id = random.randint(33,54)
+            random_video_id = random.randint(125,134)
 
             db_video_path = db.request_pexels_video(video_path=True, conditions={"id" : random_video_id})[0]['video_path']
 
@@ -119,7 +119,7 @@ def get_random_video():
 
                 while len(random_ids) < video_quantity:
 
-                    random_id = random.randint(116,124)
+                    random_id = random.randint(125,134)
 
                     if random_id not in random_ids:
                         random_ids.append(random_id)
