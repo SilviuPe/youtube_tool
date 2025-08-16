@@ -291,7 +291,7 @@ class ManualVideoGenerator(object):
         subprocess.run(cmd_final, shell=True, check=True)
 
         # === 4. Rulează Whisper pentru subtitrări ===
-        model = whisper.load_model("large")  # sau "large" pt. acuratețe maximă
+        model = whisper.load_model("small")  # sau "large" pt. acuratețe maximă
         result = model.transcribe(video_with_audio, word_timestamps=True)
 
         # === 5. Creează fișier ASS cu styling TikTok ===
