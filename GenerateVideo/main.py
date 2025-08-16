@@ -4,6 +4,7 @@ import requests
 import platform
 import subprocess
 import tempfile
+import whisper
 
 from dotenv import load_dotenv
 
@@ -52,6 +53,16 @@ API_DATA = {
                 "method": "POST"
             }
         }
+
+
+def sec_to_ass_time(sec):
+    """Convertește secunde în format ASS h:mm:ss.cs"""
+    h = int(sec // 3600)
+    m = int((sec % 3600) // 60)
+    s = int(sec % 60)
+    cs = int((sec % 1) * 100)  # centisecunde
+    return f"{h}:{m:02}:{s:02}.{cs:02}"
+
 
 class AIVideoGenerator(object):
 
@@ -227,20 +238,22 @@ class ManualVideoGenerator(object):
 
         return data
 
-    def generate_video(self, video_paths : list, audio_bytes: bytes, last_video_duration : float) -> bytes:
-        ffmpeg_path = ''
+    def generate_video(self, video_paths: list, audio_bytes: bytes, last_video_duration: float) -> bytes:
 
+        # === PATH FFmpeg ===
+
+        ffmpeg_path = ''
         if OS == 'Windows':
-            ffmpeg_path = os.path.join(CURRENT_PATH, "ffmpeg", "bin", "ffmpeg.exe")  # ajustează dacă e altă locație
+            ffmpeg_path = os.path.join(CURRENT_PATH, "ffmpeg", "bin", "ffmpeg.exe")
         if OS == 'Linux':
             ffmpeg_path = 'ffmpeg'
 
         temp_dir = tempfile.mkdtemp()
         processed_videos = []
 
+        # === 1. Prelucrează fiecare video cu fade in/out ===
         for i, path in enumerate(video_paths):
             target_duration = last_video_duration if i == len(video_paths) - 1 else self.average_video_seconds
-
             output_path = os.path.join(temp_dir, f"clip_{i}.mp4")
             processed_videos.append(output_path)
 
@@ -255,6 +268,7 @@ class ManualVideoGenerator(object):
             )
             subprocess.run(cmd, shell=True, check=True)
 
+        # === 2. Concatenează videoclipurile ===
         concat_file = os.path.join(temp_dir, "concat_list.txt")
         with open(concat_file, "w", encoding="utf-8") as f:
             for clip in processed_videos:
@@ -268,14 +282,61 @@ class ManualVideoGenerator(object):
         cmd_concat = f'"{ffmpeg_path}" -y -f concat -safe 0 -i "{concat_file}" -c copy "{concat_output}"'
         subprocess.run(cmd_concat, shell=True, check=True)
 
-        output_path = os.path.join(temp_dir, "output.mp4")
+        # === 3. Adaugă audio-ul final ===
+        video_with_audio = os.path.join(temp_dir, "with_audio.mp4")
         cmd_final = (
             f'"{ffmpeg_path}" -y -i "{concat_output}" -i "{temp_audio_path}" '
-            f'-c:v copy -c:a aac -map 0:v:0 -map 1:a:0 "{output_path}"'
+            f'-c:v copy -c:a aac -map 0:v:0 -map 1:a:0 "{video_with_audio}"'
         )
         subprocess.run(cmd_final, shell=True, check=True)
 
-        # Citim video-ul final în bytes
+        # === 4. Rulează Whisper pentru subtitrări ===
+        model = whisper.load_model("large")  # sau "large" pt. acuratețe maximă
+        result = model.transcribe(video_with_audio, word_timestamps=True)
+
+        # === 5. Creează fișier ASS cu styling TikTok ===
+        subs_path = os.path.join(temp_dir, "subs.ass")
+        with open(subs_path, "w", encoding="utf-8") as f:
+            f.write("""[Script Info]
+            ScriptType: v4.00+
+            PlayResX: 1080
+            PlayResY: 1920
+            Collisions: Normal
+            WrapStyle: 2
+            ScaledBorderAndShadow: yes
+        
+            [V4+ Styles]
+            Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+            Style: TikTok,Impact,64,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,4,2,2,20,20,100,0
+        
+            [Events]
+            Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+            """)
+
+            sub_id = 1
+            for seg in result["segments"]:
+                words = seg["words"]
+                for i in range(0, len(words), 3):  # grupuri de 3 cuvinte
+                    chunk = words[i:i + 3]
+                    if not chunk:
+                        continue
+                    start = chunk[0]["start"]
+                    end = chunk[-1]["end"]
+                    text = " ".join([w["word"].strip() for w in chunk])
+
+                    f.write(f"Dialogue: 0,{sec_to_ass_time(start)},{sec_to_ass_time(end)},TikTok,,0,0,0,,{text}\n")
+                    sub_id += 1
+
+        # === 6. Aplică subtitrările pe video final ===
+        output_path = os.path.join(temp_dir, "output.mp4")
+        cmd_subs = (
+            f'"{ffmpeg_path}" -y -i "{video_with_audio}" '
+            f'-vf "scale=-1:1920,crop=1080:1920,ass={subs_path}" '
+            f'-c:a copy "{output_path}"'
+        )
+        subprocess.run(cmd_subs, shell=True, check=True)
+
+        # === 7. Întoarce video-ul final în bytes ===
         with open(output_path, "rb") as f:
             video_bytes = f.read()
 
@@ -286,10 +347,11 @@ class ManualVideoGenerator(object):
             os.remove(concat_file)
             os.remove(temp_audio_path)
             os.remove(concat_output)
+            os.remove(video_with_audio)
+            os.remove(subs_path)
             os.remove(output_path)
             os.rmdir(temp_dir)
-
         except Exception:
-            pass  # în caz că unele fișiere sunt deja șterse
+            pass
 
         return video_bytes

@@ -12,7 +12,7 @@ json_data = {
 }
 #109.176.199.63
 # 192.168.0.108
-res = requests.post('http://192.168.0.108:5000/get-random-video', json=json_data, stream=True)
+res = requests.post('http://109.176.199.63:5000/get-random-video', json=json_data, stream=True)
 
 if res.status_code == 200:
     with open(f"{CURRENT_PATH}\\received_video.mp4", "wb") as f:

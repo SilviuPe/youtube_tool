@@ -3,3 +3,4 @@ elevenlabs
 colorama
 dotenv
 flask
+openai-whisper
