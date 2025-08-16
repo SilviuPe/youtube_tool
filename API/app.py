@@ -117,9 +117,11 @@ def get_random_video():
                 last_video_duration = video_data['last_video_duration']
                 audio_bytes = video_data['audio_bytes']
 
+                all_ids = db.request_pexels_video(id_=True, conditions={'key_word_search': data['category']})
+
                 while len(random_ids) < video_quantity:
 
-                    random_id = random.randint(125,134)
+                    random_id = all_ids[random.randint(0,len(all_ids) - 1)]['id']
 
                     if random_id not in random_ids:
                         random_ids.append(random_id)
