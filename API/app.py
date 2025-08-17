@@ -157,7 +157,7 @@ def api_doc():
 
     try:
 
-        return send_from_directory('static', 'api-doc.html')
+        return send_from_directory(f'{CURRENT_DIR}{slash}API{slash}static', 'api-doc.html')
 
     except Exception as error:
 
