@@ -151,6 +151,7 @@ def get_random_video():
 
         return f"Method not allowed"
 
+
 @app.route('/api-doc', methods=['GET'])
 def api_doc():
 
