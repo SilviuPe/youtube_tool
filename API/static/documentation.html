@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            color: #f92672;
+        }
+        .endpoint {
+            background: #e3f2fd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 6px solid #2196f3;
+        }
+        .method {
+            font-weight: bold;
+            color: #fff;
+            background: #2196f3;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Documentation</h1>
+
+    <div class="endpoint">
+        <h2>/save-new-data <span class="method">POST</span></h2>
+        <p><strong>Description:</strong> Save new videos.</p>
+        <h3>JSON Data:</h3>
+        <pre>
+[
+  {
+    "video_link": "str...",
+    "download_link": "str...",
+    "key_word_search": "str...",
+    "save_data": {
+      "filename": "str..."
+    }
+  },
+  {
+    "video_link": "str...",
+    "download_link": "str...",
+    "key_word_search": "str...",
+    "save_data": {
+      "filename": "str..."
+    }
+  }
+]
+        </pre>
+        <h3>Response:</h3>
+        <pre>string message</pre>
+    </div>
+
+    <div class="endpoint">
+        <h2>/get-random-video <span class="method">POST</span></h2>
+        <p><strong>Description:</strong> Get a new random video.</p>
+        <h3>JSON Data:</h3>
+        <pre>
+{
+  "category": "str...",
+  "video_qt": "int...",
+  "audio_script": "str..."
+}
+        </pre>
+        <h3>Response:</h3>
+        <pre>bytes</pre>
+    </div>
+
+</body>
+</html>

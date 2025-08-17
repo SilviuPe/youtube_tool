@@ -4,7 +4,7 @@ import os
 import random
 import io
 
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, send_from_directory
 from typing_extensions import override
 
 from Database.main import DatabaseConnection
@@ -150,6 +150,19 @@ def get_random_video():
     else:
 
         return f"Method not allowed"
+
+@app.route('/api-doc', methods=['GET'])
+def api_doc():
+
+    try:
+
+        return send_from_directory('static', 'api-doc.html')
+
+    except Exception as error:
+
+        return f"Exception: {str(error)}", 400
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
