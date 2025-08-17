@@ -3,40 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Documentation</title>
+    <title>API Documentation - Cyberfunk Theme</title>
     <style>
+        /* Base Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            line-height: 1.6;
-            background-color: #f9f9f9;
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #0f0f1f;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 40px;
         }
-        h1, h2 {
-            color: #333;
+
+        h1 {
+            font-size: 2.5em;
+            color: #00ffea;
+            text-shadow: 0 0 5px #00ffea, 0 0 10px #00ffea;
+            margin-bottom: 40px;
         }
+
+        h2 {
+            color: #ff2c70;
+            text-shadow: 0 0 5px #ff2c70, 0 0 10px #ff2c70;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            color: #00d4ff;
+            margin-top: 15px;
+        }
+
+        .endpoint {
+            background-color: #1a1a2e;
+            border-left: 4px solid #ff2c70;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px #ff2c70;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .endpoint:hover {
+            transform: scale(1.02);
+        }
+
+        .method {
+            font-weight: bold;
+            color: #0f0f1f;
+            background: #00ffea;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            text-shadow: 0 0 3px #00ffea;
+        }
+
         pre {
-            background: #272822;
-            color: #f8f8f2;
+            background-color: #0f0f1f;
+            color: #00ffea;
             padding: 15px;
             border-radius: 5px;
             overflow-x: auto;
+            border: 1px solid #00ffea;
+            box-shadow: 0 0 10px #00ffea;
         }
+
         code {
-            color: #f92672;
+            color: #ff2c70;
         }
-        .endpoint {
-            background: #e3f2fd;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-left: 6px solid #2196f3;
+
+        p {
+            margin-top: 5px;
         }
-        .method {
-            font-weight: bold;
-            color: #fff;
-            background: #2196f3;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 0.9em;
+
+        /* Scrollbar for code blocks */
+        pre::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background-color: #ff2c70;
+            border-radius: 4px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background-color: #1a1a2e;
         }
     </style>
 </head>
@@ -85,6 +137,5 @@
         <h3>Response:</h3>
         <pre>bytes</pre>
     </div>
-
 </body>
 </html>
