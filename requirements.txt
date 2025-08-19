@@ -4,3 +4,4 @@ colorama
 dotenv
 flask
 openai-whisper
+openai
