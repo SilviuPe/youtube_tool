@@ -174,7 +174,7 @@ class ManualGenerateVoice:
     def __init__(self) -> None:
         self.success_logger = Logger(f"{CURRENT_PATH}/log/access.log")
         self.error_logger = Logger(f"{CURRENT_PATH}/log/errors.log")
-        self.esng = ESpeakNG()  # Inițializare engine eSpeak NG
+        self.esng = ESpeakNG()
 
     def generate_voice(self, text: str, voice: str = "ro") -> list:
         """
@@ -185,14 +185,14 @@ class ManualGenerateVoice:
             voice (str): Numele vocii utilizate pentru sinteză.
 
         Returns:
-            list: Lista conținând datele audio și codul de stare HTTP.
+            bytes: Datele audio generate.
         """
         try:
             # Setează vocea
             self.esng.voice = voice
 
-            # Generează audio și obține datele în format WAV
-            audio_data = self.esng.say(text)
+            # Generează audio în format WAV
+            audio_data = self.esng.synth_wav(text)
 
             # Crează un buffer în memorie pentru a stoca datele audio
             audio_buffer = io.BytesIO(audio_data)
