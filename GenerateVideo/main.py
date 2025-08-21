@@ -316,7 +316,7 @@ class ManualVideoGenerator(object):
         
             [V4+ Styles]
             Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-            Style: TikTok,{video_style['font']},{video_style['font_size']},{video_style['primary_color']},{video_style['outline_color']},{video_style['back_color']},-1,0,0,0,100,100,0,0,5,{video_style['outline']},{video_style['shadow']},{video_style['alignment']},20,288,{video_style['margin_v']},0
+            Style: TikTok,{video_style['font']},{video_style['font_size']},{video_style['primary_color']},{video_style['outline_color']},{video_style['back_color']},-1,0,0,0,100,100,0,0,5,{video_style['outline']},{video_style['shadow']},{video_style['alignment']},20,20,{video_style['margin_v']},0
         
             [Events]
             Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
