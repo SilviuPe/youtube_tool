@@ -134,7 +134,7 @@ def get_random_video():
                     video_path = db.request_pexels_video(video_path=True, conditions={"id" : id_, **conditions})[0]['video_path']
                     video_paths.append(video_path)
 
-                video_bytes = video_tool.generate_video(video_paths, audio_bytes, last_video_duration, all_styles[0])
+                video_bytes = video_tool.generate_video(video_paths, audio_bytes, last_video_duration, all_styles[1])
 
 
                 return send_file(io.BytesIO(video_bytes), mimetype="video/mp4", as_attachment=True, download_name="video.mp4")
@@ -150,6 +150,28 @@ def get_random_video():
 
     else:
 
+        return f"Method not allowed"
+
+
+@app.route('/channels', methods=['GET', 'POST'])
+def get_channels():
+
+    if request.method == 'GET':
+        try:
+            db = DatabaseConnection()
+
+            channels = db.get_channels()
+
+            return channels, 200
+
+        except Exception as error:
+            return f"Exception: {str(error)}", 400
+
+    elif request.method == 'POST':
+
+        return "Still in development"
+
+    else:
         return f"Method not allowed"
 
 

@@ -242,7 +242,28 @@ class DatabaseConnection(object):
 
         except Exception as error:
             self.error_logger.create_error_log(
-                f"Exception: {str(error)}. [object] DatabaseConnection [method] getStyles()")
+                f"Exception: {str(error)}. [object] DatabaseConnection [method] get_styles()")
+
+            return []
+
+
+    def get_channels(self) -> list:
+
+        try:
+            get_query, cursor = self.get_insert_query_and_create_cursor('getChannels')
+
+            cursor.execute(get_query)
+
+            # Fetch all results
+            rows = cursor.fetchall()
+            col_names = [desc[0] for desc in cursor.description]
+            results = [dict(zip(col_names, row)) for row in rows]
+
+            return results
+
+        except Exception as error:
+            self.error_logger.create_error_log(
+                f"Exception: {str(error)}. [object] DatabaseConnection [method] get_channels()")
 
             return []
 
