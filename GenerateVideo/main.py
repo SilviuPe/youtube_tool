@@ -205,8 +205,8 @@ class ManualVideoGenerator(object):
     def __init__(self, average_video_seconds: int = 4) -> None:
         self.average_video_seconds = average_video_seconds
 
-        self.voice_tool = ManualGenerateVoice()
-        # self.voice_tool = AIGenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
+        #self.voice_tool = ManualGenerateVoice()
+        self.voice_tool = AIGenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
         self.db_connection = DatabaseConnection()
 
     def generate_audio(self, speech: str, download: bool = False) -> bytes:
