@@ -7,6 +7,5 @@ openai-whisper
 openai
 undetected-chromedriver
 selenium
-edge_tts
-pyaudio
-asyncio
+pyttsx3
+tempfile
