@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 import os
 import json
 import requests
-import asyncio
-import edge_tts
-import io
+
+import pyttsx3
+import tempfile
 
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
@@ -177,7 +177,7 @@ class ManualGenerateVoice:
         self.success_logger = Logger(f"{CURRENT_PATH}/log/access.log")
         self.error_logger = Logger(f"{CURRENT_PATH}/log/errors.log")
 
-    async def generate_voice(self, text: str, voice: str = "ro-RO-EmilNeural") -> list:
+    def generate_voice(self, text: str, voice: str = "ro-RO-EmilNeural") -> list:
         """
         Generează audio din text și returnează datele audio în format bytes.
 
@@ -188,34 +188,40 @@ class ManualGenerateVoice:
         Returns:
             bytes: Datele audio generate.
         """
-
         try:
+            # Inițializare engine pyttsx3
+            engine = pyttsx3.init()
 
-            communicate = edge_tts.Communicate(text, voice)
-            audio_stream = communicate.stream()
+            # Setare voce
+            voices = engine.getProperty('voices')
+            for v in voices:
+                if voice in v.id:
+                    engine.setProperty('voice', v.id)
+                    break
 
-            # Creăm un buffer în memorie pentru a stoca datele audio
-            audio_buffer = io.BytesIO()
+            # Creare fișier temporar pentru audio
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as temp_file:
+                temp_file_path = temp_file.name
 
-            # Procesăm fiecare chunk de audio și îl scriem în buffer
-            async for chunk in audio_stream:
-                if 'audio' in chunk:
-                    audio_data = chunk['audio']
-                    audio_buffer.write(audio_data)
+            # Salvare audio în fișier
+            engine.save_to_file(text, temp_file_path)
+            engine.runAndWait()
 
-            # Resetăm pointerul bufferului la început
-            audio_buffer.seek(0)
+            # Citire conținut fișier audio
+            with open(temp_file_path, 'rb') as audio_file:
+                audio_data = audio_file.read()
 
-            return [{"audio_object": audio_buffer.read()
-                     }, 200]
+            # Ștergere fișier temporar
+            os.remove(temp_file_path)
+
+            return [{"audio_object": audio_data}, 200]
 
         except Exception as error:
             self.error_logger.create_error_log(
                 f"Exception: {str(error)}. [object] ManualGenerateVoice [method] generate_voice()"
             )
 
-            return [{"error" : str(error)
-            } , 400]
+            return [{"error": str(error)}, 400]
 
 # tool = GenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
 # voices = tool.get_all_voices()
