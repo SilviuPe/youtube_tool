@@ -207,6 +207,8 @@ class ManualGenerateVoice:
             engine.save_to_file(text, temp_file_path)
             engine.runAndWait()
 
+            del engine
+
             # Citire conținut fișier audio
             with open(temp_file_path, 'rb') as audio_file:
                 audio_data = audio_file.read()
