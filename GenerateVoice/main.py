@@ -6,9 +6,8 @@ import os
 import json
 import requests
 
-import pyttsx3
-import tempfile
-
+import io
+from espeakng import ESpeakNG
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
@@ -171,13 +170,13 @@ class AIGenerateVoice(object):
             return [{"error" : str(error)
             } , 400]
 
-
 class ManualGenerateVoice:
     def __init__(self) -> None:
         self.success_logger = Logger(f"{CURRENT_PATH}/log/access.log")
         self.error_logger = Logger(f"{CURRENT_PATH}/log/errors.log")
+        self.esng = ESpeakNG()  # Inițializare engine eSpeak NG
 
-    def generate_voice(self, text: str, voice: str = "ro-RO-EmilNeural") -> list:
+    def generate_voice(self, text: str, voice: str = "ro") -> list:
         """
         Generează audio din text și returnează datele audio în format bytes.
 
@@ -186,43 +185,24 @@ class ManualGenerateVoice:
             voice (str): Numele vocii utilizate pentru sinteză.
 
         Returns:
-            bytes: Datele audio generate.
+            list: Lista conținând datele audio și codul de stare HTTP.
         """
         try:
-            # Inițializare engine pyttsx3
-            engine = pyttsx3.init()
+            # Setează vocea
+            self.esng.voice = voice
 
-            # Setare voce
-            voices = engine.getProperty('voices')
-            for v in voices:
-                if voice in v.id:
-                    engine.setProperty('voice', v.id)
-                    break
+            # Generează audio și obține datele în format WAV
+            audio_data = self.esng.say(text)
 
-            # Creare fișier temporar pentru audio
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as temp_file:
-                temp_file_path = temp_file.name
+            # Crează un buffer în memorie pentru a stoca datele audio
+            audio_buffer = io.BytesIO(audio_data)
 
-            # Salvare audio în fișier
-            engine.save_to_file(text, temp_file_path)
-            engine.runAndWait()
-
-            del engine
-
-            # Citire conținut fișier audio
-            with open(temp_file_path, 'rb') as audio_file:
-                audio_data = audio_file.read()
-
-            # Ștergere fișier temporar
-            os.remove(temp_file_path)
-
-            return [{"audio_object": audio_data}, 200]
+            return [{"audio_object": audio_buffer.read()}, 200]
 
         except Exception as error:
             self.error_logger.create_error_log(
                 f"Exception: {str(error)}. [object] ManualGenerateVoice [method] generate_voice()"
             )
-
             return [{"error": str(error)}, 400]
 
 # tool = GenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
