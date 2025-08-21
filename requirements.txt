@@ -5,3 +5,8 @@ dotenv
 flask
 openai-whisper
 openai
+undetected-chromedriver
+selenium
+edge_tts
+pyaudio
+asyncio

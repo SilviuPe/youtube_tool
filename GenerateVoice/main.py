@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 import os
 import json
 import requests
+import asyncio
+import edge_tts
+import io
 
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
@@ -168,6 +171,51 @@ class AIGenerateVoice(object):
             return [{"error" : str(error)
             } , 400]
 
+
+class ManualGenerateVoice:
+    def __init__(self) -> None:
+        self.success_logger = Logger(f"{CURRENT_PATH}/log/access.log")
+        self.error_logger = Logger(f"{CURRENT_PATH}/log/errors.log")
+
+    async def generate_voice(self, text: str, voice: str = "ro-RO-EmilNeural") -> list:
+        """
+        Generează audio din text și returnează datele audio în format bytes.
+
+        Args:
+            text (str): Textul de convertit în vorbire.
+            voice (str): Numele vocii utilizate pentru sinteză.
+
+        Returns:
+            bytes: Datele audio generate.
+        """
+
+        try:
+
+            communicate = edge_tts.Communicate(text, voice)
+            audio_stream = communicate.stream()
+
+            # Creăm un buffer în memorie pentru a stoca datele audio
+            audio_buffer = io.BytesIO()
+
+            # Procesăm fiecare chunk de audio și îl scriem în buffer
+            async for chunk in audio_stream:
+                if 'audio' in chunk:
+                    audio_data = chunk['audio']
+                    audio_buffer.write(audio_data)
+
+            # Resetăm pointerul bufferului la început
+            audio_buffer.seek(0)
+
+            return [{"audio_object": audio_buffer.read()
+                     }, 200]
+
+        except Exception as error:
+            self.error_logger.create_error_log(
+                f"Exception: {str(error)}. [object] ManualGenerateVoice [method] generate_voice()"
+            )
+
+            return [{"error" : str(error)
+            } , 400]
 
 # tool = GenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
 # voices = tool.get_all_voices()

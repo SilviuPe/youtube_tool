@@ -224,3 +224,27 @@ class DatabaseConnection(object):
         except Exception as error:
             self.error_logger.create_error_log(
                 f"Exception: {str(error)}. [object] DatabaseConnection [method] add_pexels_video()")
+
+
+    def get_styles(self) -> list:
+
+        try:
+
+            get_query, cursor = self.get_insert_query_and_create_cursor('getVideoStyles')
+            cursor.execute(get_query)
+
+            # Fetch all results
+            rows = cursor.fetchall()
+            col_names = [desc[0] for desc in cursor.description]
+            results = [dict(zip(col_names, row)) for row in rows]
+
+            return results
+
+        except Exception as error:
+            self.error_logger.create_error_log(
+                f"Exception: {str(error)}. [object] DatabaseConnection [method] getStyles()")
+
+            return []
+
+for i in DatabaseConnection().get_styles()[0]:
+    print(i)

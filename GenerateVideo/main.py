@@ -8,7 +8,7 @@ import whisper
 
 from dotenv import load_dotenv
 
-from GenerateVoice.main import AIGenerateVoice
+from GenerateVoice.main import AIGenerateVoice, ManualGenerateVoice
 from Database.main import DatabaseConnection
 
 from .log.logger import Logger
@@ -205,22 +205,31 @@ class ManualVideoGenerator(object):
     def __init__(self, average_video_seconds: int = 4) -> None:
         self.average_video_seconds = average_video_seconds
 
-        self.voice_tool = AIGenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
+        self.voice_tool = ManualGenerateVoice()
+        # self.voice_tool = AIGenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
         self.db_connection = DatabaseConnection()
 
     def generate_audio(self, speech: str, download: bool = False) -> bytes:
         """
         Method to generate the audio from text using AI
         """
-        voice_gen = self.voice_tool.generate_voice(speech)[0]['audio_object']  # generator
 
-        # Collect all chunks from generator into a single bytes object
-        audio_bytes = b"".join(chunk for chunk in voice_gen)
+        if type(self.voice_tool) == AIGenerateVoice:
+            voice_gen = self.voice_tool.generate_voice(speech)[0]['audio_object']  # generator
 
-        if download:
-            self.voice_tool.write_out_voice(audio_bytes, output_path=f"{CURRENT_PATH}\\output.mp3")
+            # Collect all chunks from generator into a single bytes object
+            audio_bytes = b"".join(chunk for chunk in voice_gen)
 
-        return audio_bytes
+            if download:
+                self.voice_tool.write_out_voice(audio_bytes, output_path=f"{CURRENT_PATH}\\output.mp3")
+
+            return audio_bytes
+
+        else:
+
+            voice_get = self.voice_tool.generate_voice(speech)[0]['audio_object']
+
+            return voice_get
 
     def define_video_data(self, audio_script : str):
 
@@ -238,7 +247,7 @@ class ManualVideoGenerator(object):
 
         return data
 
-    def generate_video(self, video_paths: list, audio_bytes: bytes, last_video_duration: float) -> bytes:
+    def generate_video(self, video_paths: list, audio_bytes: bytes, last_video_duration: float, video_style : dict) -> bytes:
 
         # === PATH FFmpeg ===
 
@@ -257,8 +266,8 @@ class ManualVideoGenerator(object):
             output_path = os.path.join(temp_dir, f"clip_{i}.mp4")
             processed_videos.append(output_path)
 
-            fade_in = 0.5
-            fade_out = 0.5
+            fade_in = video_style['fade_in']
+            fade_out = video_style['fade_out']
 
             cmd = (
                 f'"{ffmpeg_path}" -y -i "{path}" '
@@ -297,7 +306,7 @@ class ManualVideoGenerator(object):
         # === 5. Creează fișier ASS cu styling TikTok ===
         subs_path = os.path.join(temp_dir, "subs.ass")
         with open(subs_path, "w", encoding="utf-8") as f:
-            f.write("""[Script Info]
+            f.write(f"""[Script Info]
             ScriptType: v4.00+
             PlayResX: 1080
             PlayResY: 1920
@@ -307,7 +316,7 @@ class ManualVideoGenerator(object):
         
             [V4+ Styles]
             Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-            Style: TikTok,Impact,64,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,5,4,2,2,20,288,100,0
+            Style: TikTok,{video_style['font']},{video_style['font_size']},{video_style['primary_color']},{video_style['outline_color']},{video_style['back_color']},-1,0,0,0,100,100,0,0,5,{video_style['outline']},{video_style['shadow']},{video_style['alignment']},20,288,{video_style['margin_v']},0
         
             [Events]
             Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text

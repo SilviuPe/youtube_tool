@@ -1,9 +1,10 @@
 from openai import OpenAI
 import os
 import platform
-from .constants import STANDARD_PROMPT, STANDARD_MODEL
 
 from dotenv import load_dotenv
+
+from .constants import STANDARD_PROMPT, STANDARD_MODEL
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)

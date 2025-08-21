@@ -118,6 +118,7 @@ def get_random_video():
                 audio_bytes = video_data['audio_bytes']
 
                 all_ids = db.request_pexels_video(id_=True, conditions={'key_word_search': data['category']})
+                all_styles = db.get_styles()
 
                 while len(random_ids) < video_quantity:
 
@@ -133,7 +134,7 @@ def get_random_video():
                     video_path = db.request_pexels_video(video_path=True, conditions={"id" : id_, **conditions})[0]['video_path']
                     video_paths.append(video_path)
 
-                video_bytes = video_tool.generate_video(video_paths, audio_bytes, last_video_duration)
+                video_bytes = video_tool.generate_video(video_paths, audio_bytes, last_video_duration, all_styles[0])
 
 
                 return send_file(io.BytesIO(video_bytes), mimetype="video/mp4", as_attachment=True, download_name="video.mp4")
