@@ -246,5 +246,3 @@ class DatabaseConnection(object):
 
             return []
 
-for i in DatabaseConnection().get_styles()[0]:
-    print(i)
