@@ -96,11 +96,13 @@ def get_random_video():
             try:
 
                 data = request.get_json()
+
                 conditions = {}
-                video_quantity = 0
                 random_ids = []
                 video_paths = []
                 audio_script = ''
+                video_style_id = 1
+
                 if "audio_script" in data:
                     audio_script = data['audio_script']
                 else:
@@ -111,6 +113,9 @@ def get_random_video():
                 else:
                     return "category is missing", 400
 
+                if "audio_style_id" in data:
+                    video_style_id = int(data['audio_style_id'])
+
                 video_data = video_tool.define_video_data(audio_script)
 
                 video_quantity = video_data['video_qt']
@@ -118,7 +123,7 @@ def get_random_video():
                 audio_bytes = video_data['audio_bytes']
 
                 all_ids = db.request_pexels_video(id_=True, conditions={'key_word_search': data['category']})
-                all_styles = db.get_styles()
+                video_style = db.get_styles({'video_style_id' : video_style_id})[0]
 
                 while len(random_ids) < video_quantity:
 
@@ -134,7 +139,7 @@ def get_random_video():
                     video_path = db.request_pexels_video(video_path=True, conditions={"id" : id_, **conditions})[0]['video_path']
                     video_paths.append(video_path)
 
-                video_bytes = video_tool.generate_video(video_paths, audio_bytes, last_video_duration, all_styles[1])
+                video_bytes = video_tool.generate_video(video_paths, audio_bytes, last_video_duration, video_style)
 
 
                 return send_file(io.BytesIO(video_bytes), mimetype="video/mp4", as_attachment=True, download_name="video.mp4")

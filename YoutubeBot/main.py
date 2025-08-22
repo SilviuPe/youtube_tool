@@ -1,3 +1,5 @@
+import time
+
 import requests, os
 import platform
 import undetected_chromedriver as uc
@@ -5,13 +7,14 @@ import undetected_chromedriver as uc
 
 
 from dotenv import load_dotenv
+from numba.scripts.generate_lower_listing import description
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
-from utils.ai import GenerateShortScript
-from log.logger import Logger
+from .utils.ai import GenerateShortScript
+from .log.logger import Logger
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
@@ -39,10 +42,10 @@ class YoutubeBot(object):
         self.errors_logger = Logger(path=f"{CURRENT_PATH}{slash}log{slash}errors.log")
 
         if 'category' in channel_data:
-            self.json_data.update({'category' : channel_data['category'],})
+            self.json_data.update({'category' : channel_data['category']})
             self.script_tool = GenerateShortScript(channel_data['category'])
 
-    def get_video(self) -> dict:
+    def get_video(self, style_id: int) -> dict:
 
         try:
 
@@ -54,7 +57,7 @@ class YoutubeBot(object):
 
             elif 'script' in script:
                 print("SCRIPT:", script['script'])
-                self.json_data.update({'audio_script' : script['script']})
+                self.json_data.update({'audio_script' : script['script'], 'video_style_id' : style_id})
 
             res = requests.post(f'{API_IP}/get-random-video', json=self.json_data, stream=True)
 
@@ -69,7 +72,9 @@ class YoutubeBot(object):
                 self.access_logger.create_success_log("Video created successfully!")
 
                 return {
-                    'video-path' :  video_path
+                    'video-path' :  video_path,
+                    'title': script['title'],
+                    'description': script['description'],
                 }
 
             else:
@@ -392,9 +397,19 @@ class YoutubeBot(object):
                 self.errors_logger.create_error_log(
                     f"Exception: {str(error)} [object] YoutubeBot [method] __publish_video()")
 
-    def post_on_youtube(self, profile_path) -> dict:
+    def post_on_youtube(self, profile_path, style_id: int) -> dict:
 
         try:
+            new_video_response = self.get_video(style_id)
+
+            if not 'video-path' in new_video_response:
+                self.errors_logger.create_error_log(
+                    f"Video path was not created. [object] YoutubeBot [method] post_on_youtube()")
+
+                return {
+                    'message': f"Video path was not created. [object] YoutubeBot [method] post_on_youtube()",
+                    'status_code': 400
+                }
 
             options = uc.ChromeOptions()
             options.add_argument(f"--user-data-dir={profile_path}")  # user profile folder
@@ -406,10 +421,10 @@ class YoutubeBot(object):
             self.__click_on_dropdown(driver)
             self.__click_on_upload_button(driver)
 
-            self.__send_video(driver, fr"{CURRENT_PATH}{slash}received_video.mp4")
+            self.__send_video(driver, new_video_response['video-path'])
 
-            self.__type_in_title_textarea(driver, "This is just a test.")
-            self.__type_in_description_textarea(driver, "This is just a test.")
+            self.__type_in_title_textarea(driver, new_video_response['title'])
+            self.__type_in_description_textarea(driver, new_video_response['description'])
 
             self.__check_kids_feature(driver)
 
@@ -421,11 +436,9 @@ class YoutubeBot(object):
 
             self.__mark_public(driver)
 
-            # self.__save_video(driver)
-
             self.__publish_video(driver)
+            time.sleep(10)
 
-            input("Press Enter to quit...")
             driver.quit()
 
             return {

@@ -4,7 +4,7 @@ import platform
 
 from dotenv import load_dotenv
 
-from .constants import STANDARD_PROMPT, STANDARD_MODEL
+from .constants import STANDARD_PROMPT, STANDARD_MODEL, STANDARD_PROMPT_TITLE, STANDARD_PROMPT_DESCRIPTION
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
@@ -36,24 +36,42 @@ class GenerateShortScript(object):
 
         if model:
             self.standard_model = model
-        print("TEST", os.getenv("OPENAI_KEY"))
         self.client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
 
 
     def generate_script(self) -> dict:
 
         try:
-            response = self.client.responses.create(
+            response_script = self.client.responses.create(
                 model= self.standard_model,  # sau "gpt-4o-mini" pentru cost mai mic
                 input=self.standard_prompt,
                 temperature=0.9,
                 max_output_tokens=80  # suficient pentru ~80 cuvinte
             )
 
-            script = response.output[0].content[0].text
+            script = response_script.output[0].content[0].text
+
+            response_title = self.client.responses.create(
+                model=self.standard_model,  # sau "gpt-4o-mini" pentru cost mai mic
+                input=STANDARD_PROMPT_TITLE.format(script=script),
+                temperature=0.9,
+                max_output_tokens=80  # suficient pentru ~80 cuvinte
+            )
+
+            response_description = self.client.responses.create(
+                model=self.standard_model,  # sau "gpt-4o-mini" pentru cost mai mic
+                input=STANDARD_PROMPT_DESCRIPTION.format(script=script),
+                temperature=0.9,
+                max_output_tokens=80  # suficient pentru ~80 cuvinte
+            )
+
+            title = response_title.output[0].content[0].text
+            description = response_description.output[0].content[0].text
 
             return {
-                "script" : script
+                "script" : script,
+                "title" : title,
+                "description" : description,
             }
 
         except Exception as error:
@@ -61,4 +79,3 @@ class GenerateShortScript(object):
             return {
                 "error" : f"Exception: {str(error)} [object] GenerateShortScript [method] generate_script()"
             }
-

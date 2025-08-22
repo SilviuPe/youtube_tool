@@ -325,8 +325,8 @@ class ManualVideoGenerator(object):
             sub_id = 1
             for seg in result["segments"]:
                 words = seg["words"]
-                for i in range(0, len(words), 3):  # grupuri de 3 cuvinte
-                    chunk = words[i:i + 3]
+                for i in range(0, len(words), 2):  # grupuri de 3 cuvinte
+                    chunk = words[i:i + 2]
                     if not chunk:
                         continue
                     start = chunk[0]["start"]

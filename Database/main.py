@@ -153,24 +153,27 @@ class DatabaseConnection(object):
 
 
         # Check for conditions
-        condition_query = ''
 
         if conditions:
 
-            insert_query += " WHERE "
-            for condition in conditions:
-                if type(conditions[condition]) == str:
-                    condition_query += f"{condition} = '{conditions[condition]}' "
-                if type(conditions[condition]) == int:
-                    condition_query += f"{condition} = {conditions[condition]} "
-                condition_query += "AND "
+            new_query = self.apply_conditions(conditions, insert_query)
 
-        # Remove last "AND" Added
-        condition_query = condition_query[:-5]
-
-        # Concatenate SELECTION query with CONDITION query
-        insert_query = insert_query + condition_query
-        insert_query += ';'
+            if len(new_query):
+                insert_query = new_query
+        #     insert_query += " WHERE "
+        #     for condition in conditions:
+        #         if type(conditions[condition]) == str:
+        #             condition_query += f"{condition} = '{conditions[condition]}' "
+        #         if type(conditions[condition]) == int:
+        #             condition_query += f"{condition} = {conditions[condition]} "
+        #         condition_query += "AND "
+        #
+        # # Remove last "AND" Added
+        # condition_query = condition_query[:-5]
+        #
+        # # Concatenate SELECTION query with CONDITION query
+        # insert_query = insert_query + condition_query
+        # insert_query += ';'
 
         try:
 
@@ -225,12 +228,68 @@ class DatabaseConnection(object):
             self.error_logger.create_error_log(
                 f"Exception: {str(error)}. [object] DatabaseConnection [method] add_pexels_video()")
 
+    def apply_conditions(self, conditions: dict, query : str) -> str:
 
-    def get_styles(self) -> list:
+        try:
+
+            query += " WHERE "
+            condition_query = ''
+
+            for condition in conditions:
+                if type(conditions[condition]) == str:
+                    condition_query += f"{condition} = '{conditions[condition]}' "
+                if type(conditions[condition]) == int:
+                    condition_query += f"{condition} = {conditions[condition]} "
+                condition_query += "AND "
+
+            # Remove last "AND" Added
+
+            condition_query = condition_query[:-5]
+
+            # Concatenate SELECTION query with CONDITION query
+            query = query + condition_query
+            query += ';'
+
+            return query
+
+        except Exception as error:
+
+            self.error_logger.create_error_log(
+                f"Exception: {str(error)}. [object] DatabaseConnection [method] apply_conditions()")
+
+            return ''
+
+    def get_styles(self,  conditions: dict | None = None) -> list:
 
         try:
 
             get_query, cursor = self.get_insert_query_and_create_cursor('getVideoStyles')
+
+            if conditions:
+                new_query = self.apply_conditions(conditions, get_query)
+
+                if len(new_query):
+                    get_query = new_query
+
+            #     get_query = self.apply_conditions(conditions, get_query)
+            #
+            #     get_query += " WHERE "
+            #     for condition in conditions:
+            #         if type(conditions[condition]) == str:
+            #             condition_query += f"{condition} = '{conditions[condition]}' "
+            #         if type(conditions[condition]) == int:
+            #             condition_query += f"{condition} = {conditions[condition]} "
+            #         condition_query += "AND "
+            #
+            # # Remove last "AND" Added
+            # condition_query = condition_query[:-5]
+            #
+            # # Concatenate SELECTION query with CONDITION query
+            # get_query = get_query + condition_query
+            # get_query += ';'
+
+
+
             cursor.execute(get_query)
 
             # Fetch all results
