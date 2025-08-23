@@ -123,7 +123,7 @@ def get_random_video():
                 audio_bytes = video_data['audio_bytes']
 
                 all_ids = db.request_pexels_video(id_=True, conditions={'key_word_search': data['category']})
-                video_style = db.get_styles({'video_style_id' : video_style_id})[0]
+                video_style = db.get_styles({'id' : video_style_id})[0]
 
                 while len(random_ids) < video_quantity:
 
