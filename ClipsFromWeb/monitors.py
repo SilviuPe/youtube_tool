@@ -12,7 +12,11 @@ from dotenv import load_dotenv
 import os
 import platform
 import requests
+import ssl
+import certifi
 
+# Fix SSL issues
+ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=certifi.where())
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_DIR = os.path.dirname(CURRENT_PATH_FILE)
@@ -25,6 +29,8 @@ load_dotenv(dotenv_path=f'{CURRENT_PATH_FILE}{slash}..{slash}.env')
 
 API_IP = os.getenv('API')
 END_POINT = '/save-new-data'
+
+
 
 class PexelsMonitor(object):
 
