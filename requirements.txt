@@ -11,3 +11,4 @@ pyttsx3
 psycopg-binary
 psycopg
 bs4
+certifi
