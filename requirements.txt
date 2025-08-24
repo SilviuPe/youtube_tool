@@ -8,3 +8,4 @@ openai
 undetected-chromedriver
 selenium
 pyttsx3
+psycopg-binary
