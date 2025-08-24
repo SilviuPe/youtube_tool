@@ -1,29 +1,71 @@
-import undetected_chromedriver as uc
-import time
+import os
+import platform
 
-from selenium.webdriver.common.by import By
+from .monitors import MixkitMonitor,PexelsMonitor
+from .log.logger import Logger
 
-# Initialize undetected Chrome
-driver = uc.Chrome()
-driver.get("https://www.pexels.com/search/videos/hacking/")
+from threading import Thread
 
-time.sleep(3)  # wait for page to load
+CURRENT_PATH_FILE = os.path.abspath(__file__)
+CURRENT_DIR = os.path.dirname(CURRENT_PATH_FILE)
 
-# Optional: Scroll to load more videos
-last_height = driver.execute_script("return document.body.scrollHeight")
-for _ in range(3):  # scroll 3 times (adjust as needed)
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)  # wait for new content to load
-    new_height = driver.execute_script("return document.body.scrollHeight")
-    if new_height == last_height:
-        break
-    last_height = new_height
+slash = '\\'
+if platform.system() == 'Linux':
+    slash = "/"
 
-# Find all download buttons
-download_buttons = driver.find_elements(
-    By.XPATH, "//a[contains(@class, 'DownloadButton_downloadButton') and contains(., 'Download')]"
-)
 
-# Print the links
-for btn in download_buttons:
-    print(btn.get_attribute("href"))
+errors_logger = Logger(f"{CURRENT_DIR}{slash}log{slash}errors.log")
+access_logger = Logger(f"{CURRENT_DIR}{slash}log{slash}access.log")
+
+pexels_monitor = PexelsMonitor()
+mixkit_monitor = MixkitMonitor()
+
+Thread(target=mixkit_monitor.run).start()
+Thread(target=pexels_monitor.run).start()
+
+helper_display = """
+    Commands:
+        - exit -> close the program
+        - stop pexels -> stop pexels searcher
+        - stop mixkit -> stop mixkit searcher
+        - start pexels -> start pexels searcher
+        - start mixkit -> start mixkit searcher
+"""
+
+def run_main_monitor():
+
+    command = ''
+
+    while command.strip() != 'exit':
+
+        command = input("_>")
+
+        if command == 'stop pexels':
+            pexels_monitor.running_script = False
+            access_logger.create_info_log("Stopped PEXELS monitor [object-file] ClipsFromWeb.main [function] run_main_monitor()")
+
+        elif command == 'stop mixkit':
+            mixkit_monitor.running_script = True
+            access_logger.create_info_log("Stopped MIXKIT monitor [object-file] ClipsFromWeb.main [function] run_main_monitor()")
+
+        elif command == 'start mixkit':
+            mixkit_monitor.running_script = True
+            Thread(target=mixkit_monitor.run).start()
+            access_logger.create_info_log("Started MIXKIT monitor [object-file] ClipsFromWeb.main [function] run_main_monitor()")
+
+        elif command == 'start pexels':
+            pexels_monitor.running_script = True
+            Thread(target=pexels_monitor.run).start()
+            access_logger.create_info_log("Started PEXELS monitor [object-file] ClipsFromWeb.main [function] run_main_monitor()")
+
+        elif command == 'help':
+            print()
+            print(helper_display)
+            print()
+
+    access_logger.create_info_log("Main monitor stopped [object-file] ClipsFromWeb.main [function] run_main_monitor()")
+
+    mixkit_monitor.running_script = False
+    pexels_monitor.running_script = False
+
+run_main_monitor()

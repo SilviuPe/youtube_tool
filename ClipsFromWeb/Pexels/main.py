@@ -2,6 +2,7 @@ import undetected_chromedriver as uc
 import time
 import os
 import requests
+from pip._vendor.pyparsing import results
 
 from .log.logger import Logger
 from selenium.webdriver.common.by import By
@@ -20,7 +21,7 @@ class PexelsScraper(object):
 
     def __init__(self) -> None:
 
-        self.driver = uc.Chrome(options = self.generate_options_for_chrome())
+        self.driver = None
 
         self.success_logger = Logger(f"{CURRENT_DIR}\\log\\access.log")
         self.error_logger = Logger(f"{CURRENT_DIR}\\log\\errors.log")
@@ -82,8 +83,11 @@ class PexelsScraper(object):
         Method to get new videos from pexels.com
         :param: keyword - keywords search
         """
+
+        self.driver = uc.Chrome(options=self.generate_options_for_chrome())
+
         try:
-            self.driver.get(f"https://www.pexels.com/search/videos/{keyword}/")
+            self.driver.get(f"https://www.pexels.com/search/videos/{keyword}/?orientation=portrait")
 
             time.sleep(3)  # wait for page to load
 
@@ -136,16 +140,20 @@ class PexelsScraper(object):
                         }
                     })
 
+                self.driver.quit()
+
             except Exception as error:
                 self.error_logger.create_error_log(
                     f"Exception: {str(error)} [object] PexelsScraper [method] get_video_page_and_download_links()"
                 )
+                self.driver.quit()
 
             return results
 
-
         except Exception as error:
+
             self.error_logger.create_error_log(f"Exception: {str(error)} [object] PexelsScraper [method] get_new_videos()")
+            self.driver.quit()
 
             return []
 
