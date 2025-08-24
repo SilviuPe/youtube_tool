@@ -2,7 +2,6 @@ import undetected_chromedriver as uc
 import time
 import os
 import requests
-from pip._vendor.pyparsing import results
 
 from .log.logger import Logger
 from selenium.webdriver.common.by import By
