@@ -103,7 +103,11 @@ class VoiceGeneratorWindowsEdge:
             audio_bytes = io.BytesIO()
             final_audio.export(audio_bytes, format="mp3")
             audio_bytes.seek(0)
-            return [{"audio_bytes": audio_bytes.getvalue()}, 200]
+
+            bytes_content = audio_bytes.getvalue()
+            duration = AudioSegment.from_file(io.BytesIO(bytes_content)).duration_seconds
+
+            return [{"audio_bytes": bytes_content, 'duration' : duration}, 200]
 
         except Exception as error:
             self.error_logger.create_error_log(
