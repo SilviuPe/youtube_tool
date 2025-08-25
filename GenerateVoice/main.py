@@ -5,9 +5,13 @@ from dotenv import load_dotenv
 import os
 import json
 import requests
+import tempfile
+import subprocess
 
 import io
-from espeakng import ESpeakNG
+from pydub import AudioSegment
+
+from espeakng import Speaker
 
 CURRENT_PATH_FILE = os.path.abspath(__file__)
 CURRENT_PATH = os.path.dirname(CURRENT_PATH_FILE)
@@ -174,7 +178,7 @@ class ManualGenerateVoice:
     def __init__(self) -> None:
         self.success_logger = Logger(f"{CURRENT_PATH}/log/access.log")
         self.error_logger = Logger(f"{CURRENT_PATH}/log/errors.log")
-        self.esng = ESpeakNG()
+        self.esng = Speaker()
 
     def generate_voice(self, text: str, voice: str = "ro") -> list:
         """
@@ -192,7 +196,7 @@ class ManualGenerateVoice:
             self.esng.voice = voice
 
             # Generează audio în format WAV
-            audio_data = self.esng.synth_wav(text)
+            audio_data = self.esng.speak(text)
 
             # Crează un buffer în memorie pentru a stoca datele audio
             audio_buffer = io.BytesIO(audio_data)
@@ -205,12 +209,110 @@ class ManualGenerateVoice:
             )
             return [{"error": str(error)}, 400]
 
-# tool = GenerateVoice(api_key=os.getenv("ELEVENLABS_API_KEY"), voice_id="29vD33N1CtxCmqQRPOHJ")
-# voices = tool.get_all_voices()
+class VoiceGeneratorV2(object):
 
-# for voice in voices['voices']:
-#     print(voice['name'], voice['voice_id'])
-#     print()
-# voice = tool.generate_voice("Hello everyone! Did you hear about this new feature from Facebook?")[0]['audio_object']
+    def __init__(self) -> None:
+
+        self.success_logger = Logger(f"{CURRENT_PATH}/log/access.log")
+        self.error_logger = Logger(f"{CURRENT_PATH}/log/errors.log")
+        self.esng = Speaker()
+
+    def _generate_voice(self, text: str, voice="ro") -> AudioSegment:
+        import subprocess, tempfile
+        with tempfile.NamedTemporaryFile(suffix=".wav") as tmp:
+            subprocess.run([
+                "espeak-ng",
+                f"-v{voice}",
+                "-w", tmp.name,
+                text
+            ], check=True)
+            return AudioSegment.from_file(tmp.name, format="wav")
+
+    def _generate_empty(self, duration: int) -> AudioSegment:
+        """Generate silence (duration in seconds)."""
+        return AudioSegment.silent(duration=duration * 1000)  # ms
+
+    def _generate_sound(self, sound: str) -> AudioSegment:
+        """Load a predefined sound effect by name."""
+        try:
+            # You can store your sound effects in a folder like ./sounds/
+            sound_map = {
+                "keyboard typing": "sounds/keyboard_typing.wav",
+                "computer alerts": "sounds/computer_alert.wav",
+                "whirring fans": "sounds/fans.wav",
+                "bird": "sounds/bird.wav",
+                "steps": "sounds/steps.wav"
+            }
+            if sound not in sound_map:
+                raise ValueError(f"Sound effect '{sound}' not found in map")
+
+            return AudioSegment.from_file(sound_map[sound], format="wav")
+        except Exception as e:
+            self.error_logger.create_error_log(
+                f"Exception: {str(e)}. [object] VoiceGeneratorV2 [method] _generate_sound()"
+            )
+            return AudioSegment.silent(duration=1000)  # fallback
+
+    def generate_voice(self, audio_script: list, voice: str = "ro") -> list:
+        """
+        Generate audio from script and return one concatenated audio file (bytes).
+        """
+        try:
+            self.esng.voice = voice
+            final_audio = AudioSegment.silent(duration=0)
+
+            for part in audio_script:
+                if part["type"] == "voice":
+                    clip = self._generate_voice(part["text"])
+
+                elif part["type"] == "empty":
+                    clip = self._generate_empty(part["duration"])
+                else:
+                    clip = AudioSegment.silent(duration=0)  # fallback
+
+                final_audio += clip  # concatenate
+
+            # Export final audio
+            output_buffer = io.BytesIO()
+            final_audio.export(output_buffer, format="wav")
+            output_buffer.seek(0)
+
+            return [{"audio_object": output_buffer.read()}, 200]
+
+        except Exception as error:
+            self.error_logger.create_error_log(
+                f"Exception: {str(error)}. [object] VoiceGeneratorV2 [method] generate_voice()"
+            )
+            return [{"error": str(error)}, 400]
+
+s2  = [
+  {
+    "type": "empty",
+    "duration": 2
+  },
+  {
+    "type": "voice",
+    "text": "In the shadows, hackers paint a digital canvas."
+  },
+  {
+    "type": "voice",
+    "text": "With every keystroke, they break barriers."
+  },
+  {
+    "type": "voice",
+    "text": "But remember, with power comes responsibility."
+  },
+  {
+    "type": "empty",
+    "duration": 2
+  },
+  {
+    "type": "voice",
+    "text": "Are you ready to join the ranks?"
+  }
+]
+# with open(f'{CURRENT_PATH}\\output.mp3', 'wb') as f:
 #
-# tool.write_out_voice(voice)
+#     f.write(data)
+#
+#     f.close()
