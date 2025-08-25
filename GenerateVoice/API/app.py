@@ -30,7 +30,7 @@ async def create_voice():
             generated_voice = await voice_tool.generate_audio(data['audio_script'], voice_params, voice_name)
 
             if generated_voice[1] == 200:
-                return generated_voice[0]["audio_bytes"], 200
+                return jsonify({"audio" : generated_voice[0]["audio_bytes"], "duration": generated_voice[0]["duration"]}), 200
             else:
                 return jsonify({"error": "Failed to generate voice."}), 500
 
