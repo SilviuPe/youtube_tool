@@ -1,0 +1,5 @@
+pydub
+flask
+Flask[async]
+edge_tts
+audioop-lts
