@@ -1,6 +1,6 @@
 # YouTube Tool
 
-![YouTube Tool Banner](/Banner.png)
+![YouTube Tool Banner](Banner.png)
 
 A toolkit designed to create videos using AI or remix existing online clips and automatically publish them to YouTube.
 
