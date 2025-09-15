@@ -122,5 +122,4 @@ run()
 ---
 
 Built for automation and modularity — extend components as needed. Replace or add AI providers or local fallbacks to match your deployment constraints.
----
-## Status: ```In Development```
+
