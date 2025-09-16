@@ -11,7 +11,7 @@ A toolkit designed to create videos using AI or remix existing online clips and 
 This tool automates the full pipeline: find clips on the internet, generate or remix video and audio with AI (or use non-AI fallbacks), assemble the final video, and post to YouTube accounts. It is built as a modular system where each component can be swapped or extended.
 
 ---
-![Workflow](workflow.png)
+![Workflow](Workflow.png)
 ---
 ## AI Platforms Used
 
